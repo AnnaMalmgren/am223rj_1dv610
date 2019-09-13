@@ -13,7 +13,7 @@ class LayoutView {
 
   public function setLinkGoBack() {
     $this->href = "?";
-    $this->linkText = "Go back";
+    $this->linkText = "Back to login";
   }
   
   public function render($isLoggedIn, LoginView $v, DateTimeView $dtv) {
