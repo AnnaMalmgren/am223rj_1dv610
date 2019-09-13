@@ -2,6 +2,19 @@
 
 
 class LayoutView {
+
+  private $href;
+  private $linkText;
+
+  public function setLinkRegister() {
+    $this->href = "?register";
+    $this->linkText = "Register a new user";
+  }
+
+  public function setLinkGoBack() {
+    $this->href = "?";
+    $this->linkText = "Go back";
+  }
   
   public function render($isLoggedIn, LoginView $v, DateTimeView $dtv) {
     echo '<!DOCTYPE html>
@@ -12,6 +25,9 @@ class LayoutView {
         </head>
         <body>
           <h1>Assignment 2</h1>
+
+          <a href= ' . $this->href . '>' . $this->linkText . '</a>
+
           ' . $this->renderIsLoggedIn($isLoggedIn) . '
           
           <div class="container">
@@ -23,7 +39,7 @@ class LayoutView {
       </html>
     ';
   }
-  
+
   private function renderIsLoggedIn($isLoggedIn) {
     if ($isLoggedIn) {
       return '<h2>Logged in</h2>';
