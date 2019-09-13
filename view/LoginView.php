@@ -10,8 +10,6 @@ class LoginView {
 	private static $keep = 'LoginView::KeepMeLoggedIn';
 	private static $messageId = 'LoginView::Message';
 
-	
-
 	/**
 	 * Create HTTP response
 	 *
@@ -21,7 +19,13 @@ class LoginView {
 	 */
 	public function response() {
 		$message = '';
-		
+		if (isset($_POST[self::$login])) {
+			if (empty($_POST[self::$name]) || strlen(trim($_POST[self::$name])) === 0) {
+				$message =  "Username is Missing";
+		    } 
+		}
+
+
 		$response = $this->generateLoginFormHTML($message);
 		//$response .= $this->generateLogoutButtonHTML($message);
 		return $response;
