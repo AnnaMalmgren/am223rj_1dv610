@@ -1,9 +1,11 @@
 <?php
+require_once(__DIR__ . '/../controller/RegisterController.php');
+
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
     private static $password = 'RegisterView::Password';
     private static $passwordRepeat = 'RegisterView::PasswordRepeat';
-    private static $messageId = 'RegisterView::Message';
+	private static $messageId = 'RegisterView::Message';
     
     /**
 	* Generate HTML code on the output buffer for the register form.
@@ -41,7 +43,8 @@ class RegisterView extends LoginView {
 	 * @return  void
 	 */
 	public function response() {
-		$message = '';
+		$controller = new RegisterController();
+		$message = $controller->validateFormInput();
 		
         $response = $this->generateRegisterFormHTML($message);
         
