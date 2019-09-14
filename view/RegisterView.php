@@ -1,5 +1,5 @@
 <?php
-
+require(__DIR__ . '/../controller/RegisterController.php');
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
     private static $password = 'RegisterView::Password';
@@ -42,7 +42,9 @@ class RegisterView extends LoginView {
 	 * @return  void
 	 */
 	public function response() {
-		$message = '';
+		$controller = new RegisterController();
+
+		$message = $controller->validateFormInput();
 		
         $response = $this->generateRegisterFormHTML($message);
         
