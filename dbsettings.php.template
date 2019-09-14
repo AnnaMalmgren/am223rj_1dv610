@@ -1,0 +1,5 @@
+
+$servername = "server";
+$dbUsername = "db username";
+$dbPassword = "db password";
+$dbName = "db name";
