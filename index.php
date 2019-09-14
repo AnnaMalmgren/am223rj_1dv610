@@ -16,6 +16,17 @@ $rv = new RegisterView();
 $dtv = new DateTimeView();
 $lv = new LayoutView();
 
+$dbhost = getenv("DB_HOST");
+$dbUsername = getenv("DB_USERNAME");
+$dbPassword = getenv("DB_PASSWORD");
+$dbName = getenv("DB_DATABASE");
+
+$conn = mysqli_connect($dbhost, $dbUsername, $dbPassword, $dbName);
+
+if ($conn) {
+    echo "Connected!";
+}
+
  if (isset($_GET['register'])){
     $lv->setLinkGoBack();
     $lv->render(false, $rv, $dtv);
