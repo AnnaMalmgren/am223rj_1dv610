@@ -7,6 +7,6 @@ $dbName = getenv("DB_DATABASE");
 
 $conn = mysqli_connect($dbhost, $dbUsername, $dbPassword, $dbName);
 
-if(! $conn ) {
+if(!$conn ) {
     die('Could not connect to db: ' . mysqli_error());
  }

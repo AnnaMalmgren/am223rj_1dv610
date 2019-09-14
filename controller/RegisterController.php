@@ -26,7 +26,7 @@ class RegisterController {
                 return "Passwords do not match.";
             } else {
                 $user = new User();
-                return $user->registerUser();
+                return $user->registerUser($this->username, $this->password);
             }
         }
     }
