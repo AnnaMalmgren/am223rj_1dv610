@@ -16,6 +16,8 @@ $rv = new RegisterView();
 $dtv = new DateTimeView();
 $lv = new LayoutView();
 
+
+//heruko db
 $dbhost = getenv("DB_HOST");
 $dbUsername = getenv("DB_USERNAME");
 $dbPassword = getenv("DB_PASSWORD");
@@ -23,9 +25,21 @@ $dbName = getenv("DB_DATABASE");
 
 $conn = mysqli_connect($dbhost, $dbUsername, $dbPassword, $dbName);
 
-if ($conn) {
-    echo "Connected!";
-}
+if(! $conn ) {
+    die('Could not connect: ' . mysqli_error());
+ }
+
+ $sql = 'SELECT username FROM users';
+         $result = mysqli_query($conn, $sql);
+
+         if (mysqli_num_rows($result) > 0) {
+            while($row = mysqli_fetch_assoc($result)) {
+               echo "Username: " . $row["username"]. "<br>";
+            }
+         } else {
+            echo "0 results";
+         }
+         mysqli_close($conn);
 
  if (isset($_GET['register'])){
     $lv->setLinkGoBack();
