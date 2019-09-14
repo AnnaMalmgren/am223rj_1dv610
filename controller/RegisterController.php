@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__ . '/../model/User.php');
+
 class RegisterController {
     private $username = null;
     private $password = null;
@@ -23,7 +25,8 @@ class RegisterController {
             } else if ($this->password !== $this->passwordRepeat) {
                 return "Passwords do not match.";
             } else {
-                return "User registrated";
+                $user = new User();
+                return $user->registerUser(;
             }
         }
     }
