@@ -1,6 +1,5 @@
 <?php
 
-
 class LayoutView {
 
   private $href;
