@@ -44,7 +44,7 @@ class RegisterView extends LoginView {
 	 */
 	public function response() {
 		$controller = new RegisterController();
-		$message = $controller->validateFormInput();
+		$message = '';
 		
         $response = $this->generateRegisterFormHTML($message);
         
