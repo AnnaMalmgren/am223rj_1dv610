@@ -1,9 +1,9 @@
 <?php
-require_once(__DIR__ . '/../dbproduction.php');
+require_once('dbproduction.php');
 class User {
     public function registerUser($username, $password) {
         $sql = "INSERT INTO users (username, 'password')
-        VALUES ($username, '$passwors')";
+        VALUES ($username, '$password')";
 
         if ($conn->query($sql) === TRUE) {
             return "User registrated";
