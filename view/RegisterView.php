@@ -1,5 +1,4 @@
 <?php
-// require_once(__DIR__ . '/../controller/RegisterController.php');
 
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
