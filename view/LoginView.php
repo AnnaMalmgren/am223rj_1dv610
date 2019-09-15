@@ -18,7 +18,11 @@ class LoginView {
 	 * @return  void BUT writes to standard output and cookies!
 	 */
 	public function response() {
-		$message = '';
+		if (isset($_GET['msg'])) {
+			$message = $_GET['msg'];
+		} else {
+			$message = '';
+		}
 
 		$response = $this->generateLoginFormHTML($message);
 		//$response .= $this->generateLogoutButtonHTML($message);
@@ -52,7 +56,7 @@ class LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getRequestUserName() . '" />
 
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />
@@ -68,6 +72,7 @@ class LoginView {
 	
 	//CREATE GET-FUNCTIONS TO FETCH REQUEST VARIABLES
 	private function getRequestUserName() {
+		return isset($_GET['username']) ? $_GET['username'] : "";
 		//RETURN REQUEST VARIABLE: USERNAME
 	}
 	
