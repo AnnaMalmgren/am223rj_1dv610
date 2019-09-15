@@ -1,5 +1,4 @@
 <?php
-require_once(__DIR__ . '/../model/Users.php');
 
 class RegisterController {
     private $username = null;
