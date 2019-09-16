@@ -14,12 +14,12 @@ class User {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
         } else if (strlen($username) < self::$minUidLenght) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.');
-        } else if ($this->doesUserExits($username)) {
-            throw new RegisterUserException('User exists, pick another username.');
         } else if (strlen($password) < self::$minPwdLength) {
             throw new RegisterUserException('Password has too few characters, at least 6 characters.');
         } else if ($password !== $repeatedPassword) {
             throw new RegisterUserException('Passwords do not match.');
+        } else if ($this->doesUserExits($username)) {
+            throw new RegisterUserException('User exists, pick another username.');
         } else {
             $this->username = $username;
             $this->password = $this->hashPassword($password);
