@@ -7,12 +7,12 @@ class LayoutView {
   private $linkText;
 
   public function setLinkRegister() {
-    $this->href = "?register";
+    $this->href = "index.php?register";
     $this->linkText = "Register a new user";
   }
 
   public function setLinkGoBack() {
-    $this->href = "?";
+    $this->href = "index.php?";
     $this->linkText = "Back to login";
   }
 
