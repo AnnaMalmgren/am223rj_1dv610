@@ -5,7 +5,7 @@ class RegisterController {
     private $loginView;
 
     public function __construct(RegisterView $registerView, LoginView $loginView) {
-        $this->view = $view;
+        $this->registerView = $registerView;
         $this->loginView = $loginView;
     }
     
