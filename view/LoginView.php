@@ -9,6 +9,8 @@ class LoginView {
 	private static $cookiePassword = 'LoginView::CookiePassword';
 	private static $keep = 'LoginView::KeepMeLoggedIn';
 	private static $messageId = 'LoginView::Message';
+	private $message = "";
+	private $username = "";
 
 	/**
 	 * Create HTTP response
@@ -18,17 +20,30 @@ class LoginView {
 	 * @return  void BUT writes to standard output and cookies!
 	 */
 	public function response() {
-		if (isset($_GET['msg'])) {
-			$message = $_GET['msg'];
-		} else {
-			$message = '';
-		}
+		$message = $this->message;
+	
 
 		$response = $this->generateLoginFormHTML($message);
 		//$response .= $this->generateLogoutButtonHTML($message);
 		return $response;
 	}
-
+	
+	/**
+	 * Sets message to be written to the user.
+	 * @return string
+	 */
+	public function setMessage($message) : string {
+		return $this->message = $message;
+	}
+	
+	/**
+	 * Sets the username
+	 * @return string
+	 */
+	public function setUserName($username) : string {
+		return $this->username = $username;
+	}
+ 
 	/**
 	* Generate HTML code on the output buffer for the logout button
 	* @param $message, String output message
@@ -56,7 +71,7 @@ class LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getRequestUserName() . '" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->username . '" />
 
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />

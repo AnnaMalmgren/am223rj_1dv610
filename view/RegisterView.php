@@ -1,17 +1,14 @@
 <?php
-require(__DIR__ . '/../controller/RegisterController.php');
+require_once(__DIR__ . '/../model/User.php');
 
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
     private static $password = 'RegisterView::Password';
     private static $passwordRepeat = 'RegisterView::PasswordRepeat';
 	private static $messageId = 'RegisterView::Message';
-	private $controller;
+	private $message = "";
 
-	public function __construct() {
-		$this->controller = new RegisterController();
-	}
-    
+	
     /**
 	* Generate HTML code on the output buffer for the register form.
 	* @param $message, String output message
@@ -19,13 +16,13 @@ class RegisterView extends LoginView {
 	*/
 	private function generateRegisterFormHTML($message) {
 		return '
-			<form action="?register" method="post" > 
+			<form action="?" method="post" > 
 				<fieldset>
 					<legend>Register a new user - Write username and password</legend>
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUsernameValue() .'" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUserNameInput() . '" />
                     <br>
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />
@@ -38,14 +35,38 @@ class RegisterView extends LoginView {
 				</fieldset>
 			</form>
 		';
-    }
+	}
 	
 	/**
-	 * Checks if username was entered and retrives the value.
-	 *  @return string the username or an empty string.
+	 * Checks if user wants to register and returns the entered username or an empty string.
+	 * @return string the user name entered or "".
 	 */
-	private function getUsernameValue() {
-		return $this->controller->getUsername() !== null ? $this->controller->getUsername() : "";
+	private function getUserNameInput() : string {
+		return $this->userWantsToRegister() ? $_POST[self::$name] : "";
+	}
+	
+	/**
+	 * Checks if user has clicked register.
+	 * @return bool 
+	 */
+	public function userWantsToRegister() : bool {
+		return isset($_POST['DoRegistration']);
+	}
+	
+	/**
+	 * Creates an User object with entered input
+	 * @return User 
+	 */
+	public function getUser() : User {
+		return new User($this->getUserNameInput(), $_POST[self::$password], $_POST[self::$passwordRepeat]);
+	}
+	
+	/**
+	 * Sets a message to be printed to the user.
+	 * @return string message to user.
+	 */
+	public function setMessage($message) : string {
+		return $this->message = $message;
 	}
 
     /**
@@ -55,9 +76,11 @@ class RegisterView extends LoginView {
 	 *
 	 * @return  void
 	 */
-	public function response() {  
-		$message = $this->controller->validateFormInput();
+	public function response() {
+	
+		$message = $this->message;
 		
+
         $response = $this->generateRegisterFormHTML($message);
         
 		return $response;
