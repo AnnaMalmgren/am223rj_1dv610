@@ -7,6 +7,7 @@ class RegisterView extends LoginView {
     private static $passwordRepeat = 'RegisterView::PasswordRepeat';
 	private static $messageId = 'RegisterView::Message';
 	private $message = "";
+	private $action = "?register";
 
 	
     /**
@@ -16,7 +17,7 @@ class RegisterView extends LoginView {
 	*/
 	private function generateRegisterFormHTML($message) {
 		return '
-			<form action="?" method="post" > 
+			<form action="' . $this->action . '" method="post" > 
 				<fieldset>
 					<legend>Register a new user - Write username and password</legend>
 					<p id="' . self::$messageId . '">' . $message . '</p>
@@ -63,10 +64,20 @@ class RegisterView extends LoginView {
 	
 	/**
 	 * Sets a message to be printed to the user.
+	 * @param string the message to på written to the user.
 	 * @return string message to user.
 	 */
 	public function setMessage($message) : string {
 		return $this->message = $message;
+	}
+	
+	/**
+	 * Sets the action atribute.
+	 * @param string the attribute to be set to action.
+	 * @return string
+	 */
+	public function setAction($action) : string {
+		return $this->action = $action;
 	}
 
     /**
