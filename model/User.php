@@ -55,7 +55,7 @@ class User {
      * @return int the number of rows with the entered username.
      */
     private function doesUserExits($username) : bool {
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
 
         $sql = "SELECT username FROM users WHERE username=?";
         $stmt = mysqli_stmt_init($conn);
@@ -75,7 +75,7 @@ class User {
      * @return void
      */
     public function saveUserToDB() {
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);
