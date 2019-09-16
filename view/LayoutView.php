@@ -1,7 +1,8 @@
 <?php
 
 class LayoutView {
-
+  
+  private static $registerLink = "register";
   private $href;
   private $linkText;
 
@@ -14,6 +15,14 @@ class LayoutView {
     $this->href = "?";
     $this->linkText = "Back to login";
   }
+
+  /**
+	 * Checks if user has clicked register a new user.
+	 * @return bool 
+	 */
+	public function userClicksRegisterLink() : bool {
+		return isset($_GET[self::$registerLink]);
+	}
   
   public function render($isLoggedIn, LoginView $v, DateTimeView $dtv) {
     echo '<!DOCTYPE html>
