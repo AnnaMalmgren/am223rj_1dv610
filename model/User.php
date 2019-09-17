@@ -77,7 +77,7 @@ class User {
      */
     public function saveUserToDB() {
         require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        ///require(__DIR__ . '/../dbsettings.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);

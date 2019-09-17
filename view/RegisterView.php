@@ -6,6 +6,7 @@ class RegisterView extends LoginView {
     private static $password = 'RegisterView::Password';
     private static $passwordRepeat = 'RegisterView::PasswordRepeat';
 	private static $messageId = 'RegisterView::Message';
+	private static $register = 'RegisterView::Register';
 	private $message = "";
 
 	
@@ -30,7 +31,7 @@ class RegisterView extends LoginView {
                     <label for="' . self::$passwordRepeat . '">Repeat password :</label>
 					<input type="password" id="' . self::$passwordRepeat . '" name="' . self::$passwordRepeat . '" />
                     <br>
-                    <input id ="submit" type="submit" name="DoRegistration" value="Register" />
+                    <input id ="submit" type="submit" name=' . self::$register . ' value="Register" />
                     <br>
 				</fieldset>
 			</form>
