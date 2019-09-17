@@ -23,7 +23,7 @@ class RegisterView extends LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUserNameInput() . '" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . htmlspecialchars($this->getUserNameInput()) . '" />
                     <br>
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />
