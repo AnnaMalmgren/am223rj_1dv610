@@ -4,6 +4,7 @@ require_once('view/DateTimeView.php');
 require_once('view/LayoutView.php');
 require_once('view/RegisterView.php');
 require_once('controller/RegisterController.php');
+require_once('controller/LoginController.php');
 
 class App {
     private $view;
@@ -11,6 +12,7 @@ class App {
     private $loginForm;
     private $timeView;
     private $registerController;
+    private $loginController;
 
     public function __construct() {
         $this->loginForm = new LoginView();
@@ -19,14 +21,16 @@ class App {
         $this->view = new LayoutView();
 
         $this->registerController = new RegisterController($this->registerForm, $this->loginForm);
+        $this->loginController = new LoginController($this->loginForm);
     }
 
-    public function changeRegisterState() {
+    public function changeState() {
         $this->registerController->registerUser();
+        $this->loginController->loginUser();
     }
 
     public function runApp() {
-        $this->changeRegisterState();
+        $this->changeState();
 
         if ($this->registerController->getUserIsRegistered()) {
             $this->renderLoginView();

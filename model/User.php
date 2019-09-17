@@ -9,11 +9,16 @@ class User {
     private $password = null;
 
     public function __construct($username, $password, $repeatedPassword) {
+        $username = trim($username);
+        $password = trim($password);
+        $repeatedPassword = trim($repeatedPassword);
 
         if (strlen($username) === 0 && strlen($password) === 0) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
         } else if (strlen($username) < self::$minUidLenght) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.');
+        } else if ($username !== htmlentities($username)) {
+            throw new RegisterUserException('Username contains invalid characters.');
         } else if (strlen($password) < self::$minPwdLength) {
             throw new RegisterUserException('Password has too few characters, at least 6 characters.');
         } else if ($password !== $repeatedPassword) {
@@ -26,20 +31,13 @@ class User {
         }
     }
     
+    
     /**
      * Gets the username.
      * @return string
      */
     public function getUsername () : string {
         return $this->username;
-    }
-    
-    /**
-     * Gets the password
-     * @return string
-     */
-    public function getPassword() : string {
-        return $this->password;
     }
     
     /**
@@ -77,7 +75,7 @@ class User {
      */
     public function saveUserToDB() {
         require(__DIR__ . '/../dbproduction.php');
-        ///require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbsettings.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);

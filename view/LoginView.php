@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__ . '/../model/UserStorage.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -27,6 +28,10 @@ class LoginView {
 		//$response .= $this->generateLogoutButtonHTML($message);
 		return $response;
 	}
+
+	public function getUser() : User {
+		return new UserStorage($this->getRequestName(), $this->getRequestPwd());
+	}
 	
 	/**
 	 * Sets message to be written to the user.
@@ -42,6 +47,14 @@ class LoginView {
 	 */
 	public function setUserName($username) : string {
 		return $this->username = $username;
+	}
+
+	/**
+	 * Checks if user has clicked register.
+	 * @return bool 
+	 */
+	public function userWantsToLogin() : bool {
+		return isset($_POST[self::$login]);
 	}
  
 	/**
@@ -85,10 +98,12 @@ class LoginView {
 		';
 	}
 	
-	//CREATE GET-FUNCTIONS TO FETCH REQUEST VARIABLES
-	private function getRequestUserName() {
-		return isset($_GET['username']) ? $_GET['username'] : "";
-		//RETURN REQUEST VARIABLE: USERNAME
+	private function getRequestName() {
+		return $_POST[self::$name];
+	}
+
+	private function getRequestPwd() {
+		return $_POST[self::$password];
 	}
 	
 }

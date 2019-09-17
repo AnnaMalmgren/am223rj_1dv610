@@ -23,7 +23,7 @@ class RegisterView extends LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . htmlspecialchars($this->getUserNameInput()) . '" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getFilteredName() . '" />
                     <br>
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />
@@ -42,8 +42,24 @@ class RegisterView extends LoginView {
 	 * Checks if user wants to register and returns the entered username or an empty string.
 	 * @return string the user name entered or "".
 	 */
-	private function getUserNameInput() : string {
-		return $this->userWantsToRegister() ? $_POST[self::$name] : "";
+	private function getFilteredName() : string {
+		if ($this->userWantsToRegister()) {
+			return preg_replace("/[^a-zA-Z0-9\s]/", "", $this->getRequestName());
+		} else {
+			 return "";
+		 }
+	}
+
+	private function getRequestName() {
+		return $_POST[self::$name];
+	}
+
+	private function getRequestPwd() {
+		return $_POST[self::$password];
+	}
+
+	private function getRequestPwdRepeat() {
+		return $_POST[self::$passwordRepeat];
 	}
 	
 	/**
@@ -59,7 +75,7 @@ class RegisterView extends LoginView {
 	 * @return User 
 	 */
 	public function getUser() : User {
-		return new User($this->getUserNameInput(), $_POST[self::$password], $_POST[self::$passwordRepeat]);
+		return new User($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
 	}
 	
 	/**
