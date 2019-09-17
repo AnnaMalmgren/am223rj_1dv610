@@ -23,7 +23,7 @@ class RegisterController {
             try {
                 $user = $this->registerView->getUser();
                 $user->saveUserToDB();
-                $this->loginView->setMessage("User registered");
+                $this->loginView->setMessage("Registered new user.");
                 $this->loginView->setUsername($user->getUsername());
                 $this->userIsRegistered = TRUE;  
             } catch(\Exception $e) {
