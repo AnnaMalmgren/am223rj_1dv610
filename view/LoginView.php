@@ -25,7 +25,7 @@ class LoginView {
 
 		$response = $this->generateLoginFormHTML($message);
 
-        if ($this->isLoggedIn() && $this->userWantsToLogin()) {
+        if ($this->isLoggedIn()) {
 			$response = $this->generateLogoutButtonHTML($message);
 		} else {
 			$response = $this->generateLoginFormHTML($message);

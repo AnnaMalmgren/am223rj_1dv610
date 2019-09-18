@@ -37,8 +37,8 @@ class UserStorage {
     }
 
     private function getUserFromDB($username, $password) {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT username, password FROM users WHERE BINARY username=?";
         $stmt = mysqli_stmt_init($conn);
