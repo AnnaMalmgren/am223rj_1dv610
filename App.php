@@ -24,15 +24,23 @@ class App {
         $this->loginController = new LoginController($this->loginForm);
     }
 
+    private function isLoggedIn() : bool {
+        return isset($_SESSION['username']);
+    }
+
     public function changeState() {
         $this->registerController->registerUser();
         $this->loginController->loginUser();
+        $this->loginController->logoutUser();
     }
 
     public function runApp() {
+        session_start();
         $this->changeState();
-
-        if ($this->registerController->getUserIsRegistered()) {
+        
+        if($this->isLoggedIn()) {
+            $this->renderLoginView();
+        } else if ($this->registerController->getUserIsRegistered()) {
             $this->renderLoginView();
         } else {
             $this->view->userClicksRegisterLink() ? $this->renderRegisterView() : $this->renderLoginView();
@@ -41,11 +49,11 @@ class App {
 
     private function renderRegisterView() {
         $this->view->setLinkGoBack();
-        return $this->view->render(false, $this->registerForm, $this->timeView);
+        return $this->view->render($this->isLoggedIn(), $this->registerForm, $this->timeView);
     }
 
     private function renderLoginView() {
         $this->view->setLinkRegister();
-        return $this->view->render(false, $this->loginForm, $this->timeView);
+        return $this->view->render($this->isLoggedIn(), $this->loginForm, $this->timeView);
     }
 }

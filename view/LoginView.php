@@ -22,14 +22,52 @@ class LoginView {
 	 */
 	public function response() {
 		$message = $this->message;
-	
 
 		$response = $this->generateLoginFormHTML($message);
-		//$response .= $this->generateLogoutButtonHTML($message);
+
+        if ($this->isLoggedIn()) {
+			$response = $this->generateLogoutButtonHTML($message);
+		} else {
+			$response = $this->generateLoginFormHTML($message);
+		}
+		
 		return $response;
 	}
 
-	public function getUser() : User {
+	private function getRequestName() : string {
+		return $_POST[self::$name];
+	}
+
+	private function getRequestPwd() : string {
+		return $_POST[self::$password];
+	}
+	
+	/**
+	 * Checks if SESSION variable username is set.
+	 * @return bool
+	 */
+	private function isLoggedIn () : bool {
+		return isset($_SESSION['username']);
+	}
+
+	/**
+	 * Checks if user has clicked login.
+	 * @return bool 
+	 */
+	public function userWantsToLogin() : bool {
+		return isset($_POST[self::$login]);
+	}
+
+    /**
+	 * Checks if user has clicked logout.
+	 * @return bool 
+	 */
+	public function userWantsToLogout() : bool {
+		return isset($_POST[self::$logout]);
+	}
+	
+	
+	public function getUserStorage() : UserStorage {
 		return new UserStorage($this->getRequestName(), $this->getRequestPwd());
 	}
 	
@@ -49,13 +87,6 @@ class LoginView {
 		return $this->username = $username;
 	}
 
-	/**
-	 * Checks if user has clicked register.
-	 * @return bool 
-	 */
-	public function userWantsToLogin() : bool {
-		return isset($_POST[self::$login]);
-	}
  
 	/**
 	* Generate HTML code on the output buffer for the logout button
@@ -97,13 +128,4 @@ class LoginView {
 			</form>
 		';
 	}
-	
-	private function getRequestName() {
-		return $_POST[self::$name];
-	}
-
-	private function getRequestPwd() {
-		return $_POST[self::$password];
-	}
-	
 }

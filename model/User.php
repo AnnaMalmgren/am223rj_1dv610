@@ -56,7 +56,7 @@ class User {
         require(__DIR__ . '/../dbproduction.php');
         //require(__DIR__ . '/../dbsettings.php');
 
-        $sql = "SELECT username FROM users WHERE username=?";
+        $sql = "SELECT username, password FROM users WHERE username=?";
         $stmt = mysqli_stmt_init($conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {

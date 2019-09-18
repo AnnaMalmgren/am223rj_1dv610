@@ -8,6 +8,76 @@ class RegisterView extends LoginView {
 	private static $messageId = 'RegisterView::Message';
 	private static $register = 'RegisterView::Register';
 	private $message = "";
+	
+
+    /**
+	 * Create HTTP response
+	 *
+	 * Should be called after a register attempt has been determined
+	 *
+	 * @return  void
+	 */
+	public function response() {
+	
+		$message = $this->message;
+		
+
+        $response = $this->generateRegisterFormHTML($message);
+        
+		return $response;
+	}
+
+	private function getRequestName() : string {
+		return $_POST[self::$name];
+	}
+
+	private function getRequestPwd() : string {
+		return $_POST[self::$password];
+	}
+
+	private function getRequestPwdRepeat() : string {
+		return $_POST[self::$passwordRepeat];
+	}
+
+	/**
+	 * Checks if user has clicked register.
+	 * @return bool 
+	 */
+	public function userWantsToRegister() : bool {
+		return isset($_POST[self::$register]);
+	}
+
+	/**
+	 * Checks if user wants to register and returns the entered username or an empty string.
+	 * @return string the user name entered or "".
+	 */
+	private function getFilteredName() : string {
+		if ($this->userWantsToRegister()) {
+			return preg_replace("/[^a-zA-Z0-9\s]/", "", $this->getRequestName());
+		} else {
+			 return "";
+		 }
+	}
+
+	/**
+	 * Creates an User object with entered input
+	 * @return User 
+	 */
+	public function getUser() : User {
+		return new User($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
+	}
+	
+
+
+
+	/**
+	 * Sets a message to be printed to the user.
+	 * @param string the message to på written to the user.
+	 * @return string message to user.
+	 */
+	public function setMessage($message) : string {
+		return $this->message = $message;
+	}
 
 	
     /**
@@ -37,71 +107,5 @@ class RegisterView extends LoginView {
 			</form>
 		';
 	}
-	
-	/**
-	 * Checks if user wants to register and returns the entered username or an empty string.
-	 * @return string the user name entered or "".
-	 */
-	private function getFilteredName() : string {
-		if ($this->userWantsToRegister()) {
-			return preg_replace("/[^a-zA-Z0-9\s]/", "", $this->getRequestName());
-		} else {
-			 return "";
-		 }
-	}
 
-	private function getRequestName() {
-		return $_POST[self::$name];
-	}
-
-	private function getRequestPwd() {
-		return $_POST[self::$password];
-	}
-
-	private function getRequestPwdRepeat() {
-		return $_POST[self::$passwordRepeat];
-	}
-	
-	/**
-	 * Checks if user has clicked register.
-	 * @return bool 
-	 */
-	public function userWantsToRegister() : bool {
-		return isset($_POST[self::$register]);
-	}
-	
-	/**
-	 * Creates an User object with entered input
-	 * @return User 
-	 */
-	public function getUser() : User {
-		return new User($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
-	}
-	
-	/**
-	 * Sets a message to be printed to the user.
-	 * @param string the message to på written to the user.
-	 * @return string message to user.
-	 */
-	public function setMessage($message) : string {
-		return $this->message = $message;
-	}
-	
-
-    /**
-	 * Create HTTP response
-	 *
-	 * Should be called after a register attempt has been determined
-	 *
-	 * @return  void
-	 */
-	public function response() {
-	
-		$message = $this->message;
-		
-
-        $response = $this->generateRegisterFormHTML($message);
-        
-		return $response;
-	}
 }

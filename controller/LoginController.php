@@ -10,11 +10,19 @@ class LoginController {
     public function loginUser() {
         if ($this->view->userWantsToLogin()) {
             try {
-                $user = $this->view->getUser();
+                $user = $this->view->getUserStorage();
+                $this->view->setMessage("Welcome");
             } catch(\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
             }
+        }
+    }
+
+    public function logoutUser () {
+        if ($this->view->userWantsToLogout()) {
+            session_unset();
+            session_destroy();
         }
     }
 }
