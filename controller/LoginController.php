@@ -22,6 +22,7 @@ class LoginController {
 
     public function logoutUser () {
         if ($this->view->userWantsToLogout()) {
+            $this->view->setMessage("Bye bye!");
             session_unset();
             session_destroy();
         }
