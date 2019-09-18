@@ -38,9 +38,7 @@ class App {
         session_start();
         $this->changeState();
         
-        if($this->isLoggedIn()) {
-            $this->renderLoginView();
-        } else if ($this->registerController->getUserIsRegistered()) {
+       if ($this->registerController->getUserIsRegistered()) {
             $this->renderLoginView();
         } else {
             $this->view->userClicksRegisterLink() ? $this->renderRegisterView() : $this->renderLoginView();

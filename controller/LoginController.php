@@ -21,10 +21,10 @@ class LoginController {
     }
 
     public function logoutUser () {
-        if ($this->view->userWantsToLogout()) {
-            $this->view->setMessage("Bye bye!");
+        if ($this->view->userWantsToLogout() && isset($_SESSION['username'])) {
             session_unset();
             session_destroy();
+            $this->view->setMessage("Bye bye!");
         }
     }
 }

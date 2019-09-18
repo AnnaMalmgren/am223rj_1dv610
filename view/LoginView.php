@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../model/UserStorage.php');
+require_once(__DIR__ . '/../model/LoginUser.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
