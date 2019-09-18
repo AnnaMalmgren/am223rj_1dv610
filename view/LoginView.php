@@ -83,9 +83,19 @@ class LoginView {
 	 * Sets the username
 	 * @return string
 	 */
-	public function setUserName($username) : string {
-		return $this->username = $username;
+	public function setUserName($username) {
+		$this->username = $username;
 	}
+
+	private function getUserName() : string {
+		if ($this->userWantsToLogin()) {
+			return $this->getRequestName();
+		} else {
+			return $this->username;
+		}
+	}
+
+
 
  
 	/**
@@ -115,7 +125,7 @@ class LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->username . '" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUserName() . '" />
 
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />

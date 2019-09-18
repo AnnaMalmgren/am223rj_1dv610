@@ -11,6 +11,7 @@ class LoginController {
         if ($this->view->userWantsToLogin()) {
             try {
                 $user = $this->view->getUserStorage();
+                $this->view->setUserName($this->view->getRequestName());
                 $this->view->setMessage("Welcome");
             } catch(\Exception $e) {
                 $message = $e->getMessage();
