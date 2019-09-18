@@ -15,43 +15,49 @@ class App {
     private $loginController;
 
     public function __construct() {
-        $this->loginForm = new LoginView();
-        $this->registerForm = new RegisterView();
+        $this->loginView = new LoginView();
+        $this->regView = new RegisterView();
         $this->timeView = new DateTimeView();
         $this->view = new LayoutView();
 
-        $this->registerController = new RegisterController($this->registerForm, $this->loginForm);
-        $this->loginController = new LoginController($this->loginForm);
-    }
-
-    private function isLoggedIn() : bool {
-        return isset($_SESSION['username']);
-    }
-
-    public function changeState() {
-        $this->registerController->registerUser();
-        $this->loginController->loginUser();
-        $this->loginController->logoutUser();
+        $this->registerController = new RegisterController($this->regView, $this->loginView);
+        $this->loginController = new LoginController($this->loginView);
     }
 
     public function runApp() {
         session_start();
         $this->changeState();
-        
-       if ($this->registerController->getUserIsRegistered()) {
-            $this->renderLoginView();
+        $this->renderViews();
+    }
+
+    private function changeState() {
+        $this->registerController->registerUser();
+        $this->loginController->loginUser();
+        $this->loginController->logoutUser();
+    }
+
+    private function renderViews() {
+        if ($this->registerController->getUserIsRegistered()) {
+            $this->renderLoginView(); 
         } else {
-            $this->view->userClicksRegisterLink() ? $this->renderRegisterView() : $this->renderLoginView();
+            $this->view->userClicksRegisterLink() ? 
+                $this->renderRegisterView() : $this->renderLoginView();
         }
     }
 
     private function renderRegisterView() {
-        $this->view->setLinkGoBack();
-        return $this->view->render($this->isLoggedIn(), $this->registerForm, $this->timeView);
+        $link = '<a href="?">Back to login</a>';
+        $this->view->setLink($link);
+        $this->view->render($this->loginView->isLoggedIn(), $this->regView, $this->timeView);
     }
 
     private function renderLoginView() {
-        $this->view->setLinkRegister();
-        return $this->view->render($this->isLoggedIn(), $this->loginForm, $this->timeView);
+        $link = '<a href="?register">Register a new user</a>';
+        
+        if(!$this->loginView->isLoggedIn()) {
+            $this->view->setLink($link);
+        }
+       
+        $this->view->render($this->loginView->isLoggedIn(), $this->loginView, $this->timeView);
     }
 }

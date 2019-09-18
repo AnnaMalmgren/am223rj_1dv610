@@ -3,18 +3,12 @@
 class LayoutView {
   
   private static $registerLink = "register";
-  private $href;
-  private $linkText;
+  private $link = "";
 
-  public function setLinkRegister() {
-    $this->href = "index.php?register";
-    $this->linkText = "Register a new user";
+  public function setLink($link) {
+    $this->link = $link;
   }
 
-  public function setLinkGoBack() {
-    $this->href = "index.php?";
-    $this->linkText = "Back to login";
-  }
 
   /**
 	 * Checks if user has clicked register a new user.
@@ -34,7 +28,7 @@ class LayoutView {
         <body>
           <h1>Assignment 2</h1>
 
-          <a href= ' . $this->href . '>' . $this->linkText . '</a>
+          ' . $this->link . '
 
           ' . $this->renderIsLoggedIn($isLoggedIn) . '
           

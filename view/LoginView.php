@@ -46,7 +46,7 @@ class LoginView {
 	 * Checks if SESSION variable username is set.
 	 * @return bool
 	 */
-	private function isLoggedIn () : bool {
+	public function isLoggedIn () : bool {
 		return isset($_SESSION['username']);
 	}
 
@@ -67,8 +67,8 @@ class LoginView {
 	}
 	
 	
-	public function getUserStorage() : UserStorage {
-		return new UserStorage($this->getRequestName(), $this->getRequestPwd());
+	public function getLoginUser() : LoginUser {
+		return new LoginUser($this->getRequestName(), $this->getRequestPwd());
 	}
 	
 	/**
@@ -95,9 +95,6 @@ class LoginView {
 		}
 	}
 
-
-
- 
 	/**
 	* Generate HTML code on the output buffer for the logout button
 	* @param $message, String output message
@@ -119,7 +116,7 @@ class LoginView {
 	*/
 	private function generateLoginFormHTML($message) {
 		return '
-			<form method="post" > 
+			<form method="post" action="?" > 
 				<fieldset>
 					<legend>Login - enter Username and password</legend>
 					<p id="' . self::$messageId . '">' . $message . '</p>
