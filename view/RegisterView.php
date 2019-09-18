@@ -53,7 +53,7 @@ class RegisterView extends LoginView {
 	 */
 	private function getFilteredName() : string {
 		if ($this->userWantsToRegister()) {
-			return preg_replace("/[^a-zA-Z0-9\s]/", "", $this->getRequestName());
+			return strip_tags($this->getRequestName());
 		} else {
 			 return "";
 		 }
