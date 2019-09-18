@@ -27,7 +27,7 @@ class RegisterView extends LoginView {
 		return $response;
 	}
 
-	private function getRequestName() : string {
+	public function getRequestName() : string {
 		return $_POST[self::$name];
 	}
 
