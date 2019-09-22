@@ -16,6 +16,12 @@ class LoginController {
                 }
 
                 $user = $this->view->getLoginUser();
+
+                if ($this->view->rememberMe() && $user) {
+                   $user->createCookies($this->view->getCookieName(), $this->view->getCookiePassword());
+                   $user->saveAuthToDB();
+                }
+
                 $this->view->setUserName($this->view->getRequestName()); 
             } catch(\Exception $e) {
                 $message = $e->getMessage();

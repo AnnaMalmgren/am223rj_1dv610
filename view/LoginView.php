@@ -35,11 +35,11 @@ class LoginView {
 	}
 
 	public function getRequestName() : string {
-		return $_POST[self::$name];
+		return trim($_POST[self::$name]);
 	}
 
 	private function getRequestPwd() : string {
-		return $_POST[self::$password];
+		return trim($_POST[self::$password]);
 	}
 	
 	/**
@@ -48,6 +48,14 @@ class LoginView {
 	 */
 	public function isLoggedIn () : bool {
 		return isset($_SESSION['username']);
+	}
+
+	/**
+	 * Checks if user clicked "remember me".
+	 * @return bool
+	 */
+	public function rememberMe() : bool {
+		return isset($_POST[self::$keep]);
 	}
 
 	/**
@@ -94,6 +102,15 @@ class LoginView {
 			return $this->username;
 		}
 	}
+
+	public function getCookieName() {
+		return self::$cookieName;
+	}
+
+	public function getCookiePassword() {
+		return self::$cookiePassword;
+	}
+
 
 	/**
 	* Generate HTML code on the output buffer for the logout button
