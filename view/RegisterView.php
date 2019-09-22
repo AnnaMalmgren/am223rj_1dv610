@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../model/RegisterUser.php');
+require_once(__DIR__ . '/../model/User.php');
 
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
@@ -28,15 +28,15 @@ class RegisterView extends LoginView {
 	}
 
 	public function getRequestName() : string {
-		return $_POST[self::$name];
+		return trim($_POST[self::$name]);
 	}
 
-	private function getRequestPwd() : string {
-		return $_POST[self::$password];
+	public function getRequestPwd() : string {
+		return trim($_POST[self::$password]);
 	}
 
-	private function getRequestPwdRepeat() : string {
-		return $_POST[self::$passwordRepeat];
+	public function getRequestPwdRepeat() : string {
+		return trim($_POST[self::$passwordRepeat]);
 	}
 
 	/**

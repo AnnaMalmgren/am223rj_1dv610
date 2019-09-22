@@ -30,6 +30,18 @@ class LoginController {
         }
     }
 
+    public function isCookieNameSet() : bool {
+        return isset($_COOKIE[$this->view->getCookieName()]);
+    }
+
+    public function isCookiePasswordSet() : bool {
+        return isset($_COOKIE[$this->view->getCookiePassword()]);
+    }
+
+    public function validateAuthCookies() : bool {
+        return $this->user->validateCookies($this->view->getCookiePassword());
+    }
+
     public function logoutUser () {
         if ($this->view->userWantsToLogout() && $this->view->isLoggedIn()) {
             session_unset();

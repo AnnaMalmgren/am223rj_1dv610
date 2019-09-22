@@ -37,7 +37,10 @@ class App {
     }
 
     private function renderViews() {
-        if ($this->registerController->getUserIsRegistered()) {
+        if ($this->loginController->isCookieNameSet() && $this->loginController->isCookiePasswordSet()) {
+            $this->loginController->validateAuthCookies() ? 
+            $this->renderLoginView() :  $this->renderRegisterView();
+        } else if ($this->registerController->getUserIsRegistered()) {
             $this->renderLoginView(); 
         } else {
             $this->view->userClicksRegisterLink() ? 

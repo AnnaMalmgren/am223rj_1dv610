@@ -6,7 +6,7 @@ class LoginUser {
     private $username;
     private $password;
     private $hashedPassword;
-    private $cookieExpiresIn; 
+    private $cookieExpiresIn;
 
     public function __construct($username, $password) {
 
@@ -19,11 +19,13 @@ class LoginUser {
     }
 
     private function isFormValid($username, $password) : Bool {
+        $sql = "SELECT * FROM users WHERE BINARY username=?";
+
         if (empty($username)) {
             throw new LoginUserException('Username is missing');
         } else if(empty($password)) {
             throw new LoginUserException('Password is missing');
-        } else if (!$this->getUserFromDB($username, $password)) {
+        } else if (!$this->getUserFromDB($username, $sql)) {
             throw new LoginUserException('Wrong name or password');
         } else if (!$this->verifyPassword($username, $password)){
             throw new LoginUserException('Wrong name or password');
@@ -39,19 +41,20 @@ class LoginUser {
     }
     
     private function verifyPassword ($username, $password) : bool {
-        $userData = $this->getUserFromDB($username, $password);
+        $sql = "SELECT * FROM users WHERE BINARY username=?";
+        $userData = $this->getUserFromDB($username, $sql);
+
         return password_verify($password, $userData['password']);       
     }
 
-    private function getUserFromDB($username, $password) {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+    private function getUserFromDB($username, $sql) {
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
 
-        $sql = "SELECT username, password FROM users WHERE BINARY username=?";
         $stmt = mysqli_stmt_init($conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
-            throw new Exception('Something went wrong.');
+            throw new Exception('Something went wrong in getUser.');
             exit();
         } 
         
@@ -62,24 +65,18 @@ class LoginUser {
         return $userData;
     }
 
-        public function createCookies($cookieUsername, $cookiePassword) {
-        $this->cookieExpiresIn = time() + 3600 * 24;
-        $bytesLength = 16;
-        $randomPassword = bin2hex(random_bytes($bytesLength));
-        $this->hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
-        setcookie($cookiePassword, $randomPassword, $this->cookieExpiresIn, "/", "",  TRUE, TRUE);
-        setcookie ($cookieUsername, $this->username, $this->cookieExpiresIn, "/", "", TRUE, TRUE);
-    
-    }
-
     public function saveAuthToDB() {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
         $expireDate = date("Y-m-d H:i:s", $this->cookieExpiresIn);
- 
+
+        if ($this->isAuthInDB()) {
+            return $this->updateAuthUser();
+        }
+
          $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
          $stmt = mysqli_stmt_init($conn);
- 
+
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
@@ -88,5 +85,63 @@ class LoginUser {
          }   
     }
 
+    private function isAuthInDB() : bool {
+        $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
+        
+        if ($this->getUserFromDB($this->username, $sql)) {
+           return TRUE;
+        } else {
+           return FALSE;
+        }
+    }
+
+    private function authPasswordVerify($cookiepassword) {
+        return password_verify($_COOKIE[$cookiepassword], $this->hashedPassword);
+    }
+
+    private function authExpireDate() {
+        $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
+        $currentDate = date("Y-m-d H:i:s", time());
+        $authUser = $this->getUserFromDB($this->username, $sql);
+
+        if ($authUser['expireDate'] > $currentDate ) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    public function validateCookies($cookiepassword) : BOOL {
+        if ($this->authExpireDate() && $this->authPasswordVerify($cookiepassword)) {
+            return TRUE;
+        }
+    }
+
+    public function createCookies($cookieName, $cookiePassword) {
+        $this->cookieExpiresIn = time() + 3600 * 24;
+        $bytesLength = 16;
+        $randomPassword = bin2hex(random_bytes($bytesLength));
+        $this->hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+
+        setcookie($cookieName, $this->username, $this->cookieExpiresIn, "/", "", TRUE, TRUE);
+        setcookie($cookiePassword, $randomPassword, $this->cookieExpiresIn, "/", "",  TRUE, TRUE);
+    }
+
+    public function updateAuthUser() {
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
+        $expireDate = date("Y-m-d H:i:s", $this->cookieExpiresIn);
+
+         $sql = "UPDATE auth_users SET expireDate = ? WHERE authUsername = ?";
+         $stmt = mysqli_stmt_init($conn);
+ 
+         if (!mysqli_stmt_prepare($stmt, $sql)) {
+             return "Something went wrong (sql error)";
+         } else {
+             mysqli_stmt_bind_param($stmt, "ss", $expireDate, $this->username);
+             mysqli_stmt_execute($stmt);
+         }   
+
+    }
 
 }

@@ -9,11 +9,14 @@ class User {
     private $password = null;
 
     public function __construct($username, $password, $repeatedPassword) {
-        $username = trim($username);
-        $password = trim($password);
-        $repeatedPassword = trim($repeatedPassword);
+        if ($this->isFormValid($username, $password, $repeatedPassword)) {
+            $this->username = $username;
+            $this->password = $this->hashPassword($password);
+        }
+    }
 
-        if (strlen($username) === 0 && strlen($password) === 0) {
+    private function isFormValid($username, $password, $repeatedPassword) : bool {
+        if (empty($username) && empty($password)) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
         } else if (strlen($username) < self::$minUidLenght) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.');
@@ -26,8 +29,7 @@ class User {
         } else if ($this->doesUserExits($username)) {
             throw new RegisterUserException('User exists, pick another username.');
         } else {
-            $this->username = $username;
-            $this->password = $this->hashPassword($password);
+            return TRUE;
         }
     }
     
@@ -53,8 +55,8 @@ class User {
      * @return int the number of rows with the entered username.
      */
     private function doesUserExits($username) : bool {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT username, password FROM users WHERE BINARY username=?";
         $stmt = mysqli_stmt_init($conn);
@@ -74,8 +76,8 @@ class User {
      * @return void
      */
     public function saveUserToDB() {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);
