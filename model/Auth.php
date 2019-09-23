@@ -9,7 +9,7 @@ class Auth {
 
         //IMPLEMENT PASSWORD VERIFY!!  
         
-        if($expireDate > $currentDate && $passwordCheck) {
+        if($expireDate > $currentDate) {
             $_SESSION['username'] = $uid;
         }
     }
