@@ -19,8 +19,8 @@ class LoginController {
                 $this->user = $this->view->getLoginUser();
 
                 if ($this->view->rememberMe() && $user) {
-                   $user->createCookies($this->view->getCookieName(), $this->view->getCookiePassword());
-                   $user->saveAuthToDB();
+                   $this->user->createCookies($this->view->getCookieName(), $this->view->getCookiePassword());
+                   $this->user->saveAuthToDB();
                 }
 
                 $this->view->setUserName($this->view->getRequestName()); 
