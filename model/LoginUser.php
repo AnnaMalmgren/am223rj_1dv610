@@ -104,7 +104,7 @@ class LoginUser {
         $currentDate = date("Y-m-d H:i:s", time());
         $authUser = $this->getUserFromDB($this->username, $sql);
 
-        return ($authUser['expireDate'];
+        return $authUser['expireDate'];
     }
 
 
