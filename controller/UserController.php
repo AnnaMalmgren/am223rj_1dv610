@@ -12,7 +12,6 @@ class UserController {
     private $userIsRegistered = FALSE;
     private $minUidLenght = 3;
     private $minPwdLenght = 6;
-    private $isAuthenticated = FALSE;
 
     public function __construct(RegisterView $registerView, LoginView $loginView) {
         $this->registerView = $registerView;
@@ -77,6 +76,7 @@ class UserController {
 
     public function authUser() {
         if($this->loginView->userWantsToAuthenticate() && !isset($_SESSION['username'])) {
+
             $uid = $this->loginView->getCookieNameValue();
             $pwd = $this->loginView->getCookiePasswordValue();
 
@@ -86,6 +86,8 @@ class UserController {
             if (!$expireCheck || !$pwdTokenCheck ) {
                 return;
             }
+
+            $this->loginView->setWelcomeMessage();
 
             $_SESSION['username'] = $uid;
         }
@@ -98,11 +100,11 @@ class UserController {
             $loginPwd =  $this->loginView->getRequestPwd();
 
             try {
-               $this->setLoginMessage();
-
                 if (!$this->isLoginFormValid($loginUid, $loginPwd)) {
                     return;
                 }
+
+                $this->loginView->setWelcomeMessage();
 
                 $user = $this->loginView->getLoginUser();
                 $this->verifyLoginUser($user, $loginUid, $loginPwd);
@@ -153,11 +155,6 @@ class UserController {
 
     }
 
-    private function setLoginMessage() {
-        if (!$this->loginView->isLoggedIn()) {
-            $this->loginView->setMessage("Welcome");
-        }
-    }
 
     private function startNewSession($uid) {
         session_regenerate_id();
