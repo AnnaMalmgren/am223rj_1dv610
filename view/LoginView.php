@@ -49,7 +49,9 @@ class LoginView {
 	 */
 	public function isLoggedIn () {
 		if ($this->isAuthCookiesSet) {
-			return $this->isAuthenticated();
+			if ($this->isAuthenticated()) {
+				return TRUE;
+			}
 		} else if (isset($_SESSION['username'])) {
 			return TRUE;
 		}
