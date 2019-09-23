@@ -17,6 +17,8 @@ class Auth {
         $currentDate = date("Y-m-d H:i:s", time());
  
        if($user['expireDate'] > $currentDate && $this->verifyPassword($user)) {
+           session_regenerate_id();
+           $_SESSION['username'] = $this->authUser;
            return TRUE;
        } else {
            return FALSE;

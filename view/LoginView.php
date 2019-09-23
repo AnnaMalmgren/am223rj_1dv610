@@ -49,14 +49,13 @@ class LoginView {
 	 * @return bool
 	 */
 	public function isLoggedIn() {
+		if ($this->isAuthCookiesSet()) {
+			$this->setIsAuth();
+		}
+
 		if (isset($_SESSION['username'])) {
 			return TRUE;
-		} else if ($this->isAuthCookiesSet()) {
-			$this->setIsAuth();
-			if ($this->isAuth) {
-				return TRUE;
-			}
-		}
+		} 
 	}
 
 	private function setIsAuth() {
