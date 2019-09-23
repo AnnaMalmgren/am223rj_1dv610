@@ -50,14 +50,16 @@ class LoginView {
 	public function isLoggedIn () {
 		if (isset($_SESSION['username'])) {
 			return TRUE;
-		} else if (!empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword])) {
-			return $this->validateCookies ? TRUE : FALSE;
+		} else if ($this->isAuthCookiesSet()) {
+			$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+			if ($auth->AuthUser()) {
+				return TRUE;
+			}
 		}
 	}
 
-	private function validateCookies() : Bool {
-		$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
-		return $auth->AuthUser();
+	private function isAuthCookiesSet() : Bool {
+		return !empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword]);
 	}
 
 	/**
