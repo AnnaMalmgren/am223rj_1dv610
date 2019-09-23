@@ -1,22 +1,27 @@
 <?php
 
 class Auth {
+    public function verifyPwdToken($uid, $pwd) : bool {
+        $userData = $this->getAuthUserFromDB($uid);
 
-    public function verifyUser($uid, $pwd) {
-        $user = $this->getAuthUserFromDB($uid);
-        $currentDate = date("Y-m-d H:i:s", time());
-        $expireDate = $user['expireDate'];
-
-        //IMPLEMENT PASSWORD VERIFY!!  
-        
-        if($expireDate > $currentDate) {
-            $_SESSION['username'] = $uid;
+        if(password_verify($pwd, $userData['passwordHash']) ){
+            echo "THIS TOO";
         }
+
+        return password_verify($pwd, $userData['passwordHash']);
+    }
+
+    public function verifyExpireDate($uid) : bool {
+        $userData = $this->getAuthUserFromDB($uid);
+        $currentDate = date("Y-m-d H:i:s", time());
+        $expireDate = $userData['expireDate'];
+
+        return $expireDate > $currentDate;
     }
 
     private function getAuthUserFromDB($uid) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
 
@@ -35,14 +40,14 @@ class Auth {
     }
 
     public function saveAuthToDB($uid, $pwd) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
         if ($this->isAuthInDB($uid)) {
-            return $this->updateAuthUser($uid);
+            return $this->updateAuthUser($uid, $pwd);
         }
 
          $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
@@ -56,21 +61,21 @@ class Auth {
          }   
     }
 
-    private function updateAuthUser($uid) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+    private function updateAuthUser($uid, $pwd) {
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
 
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
-        $sql = "UPDATE auth_users SET expireDate = ? WHERE BINARY authUsername = ?";
+        $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ? WHERE BINARY authUsername = ?";
          $stmt = mysqli_stmt_init($conn);
 
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
-             mysqli_stmt_bind_param($stmt, "ss", $expireDate, $uid);
+             mysqli_stmt_bind_param($stmt, "sss", $expireDate, $pwd, $uid);
              mysqli_stmt_execute($stmt);
          }   
 

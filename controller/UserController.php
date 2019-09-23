@@ -12,6 +12,7 @@ class UserController {
     private $userIsRegistered = FALSE;
     private $minUidLenght = 3;
     private $minPwdLenght = 6;
+    private $isAuthenticated = FALSE;
 
     public function __construct(RegisterView $registerView, LoginView $loginView) {
         $this->registerView = $registerView;
@@ -79,7 +80,14 @@ class UserController {
             $uid = $this->loginView->getCookieNameValue();
             $pwd = $this->loginView->getCookiePasswordValue();
 
-            $this->auth->verifyUser($uid, $pwd);
+            $expireCheck = $this->auth->verifyExpireDate($uid);
+            $pwdTokenCheck = $this->auth->verifyPwdToken($uid, $pwd);
+
+            if (!$expireCheck || !$pwdTokenCheck ) {
+                return;
+            }
+
+            $_SESSION['username'] = $uid;
         }
     }
 
@@ -99,7 +107,7 @@ class UserController {
                 $user = $this->loginView->getLoginUser();
                 $this->verifyLoginUser($user, $loginUid, $loginPwd);
                 $this->startNewSession($loginUid);
-                $this->setAuthCookies($user);
+                $this->setCookiesSaveToDB($user);
                 $this->loginView->setUserName($loginUid);
 
             } catch(\Exception $e) {
@@ -117,23 +125,21 @@ class UserController {
         }
     }
 
-    private function setAuthCookies($user) {
+    private function setCookiesSaveToDB($user) {
         if ($this->loginView->rememberMe() && $user) {
-            $this->createCookies();
-         }
-    }
-
-         private function createCookies() {
-            $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
-
             $bytesLength = 12;
             $randomPassword = bin2hex(random_bytes($bytesLength));
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+            $this->createCookies($randomPassword );
+            $this->auth->saveAuthToDB($this->loginView->getRequestName(), $hashedPassword);
+         }
+    }
+
+         private function createCookies($randomPwd) {
+            $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
     
             setcookie($this->loginView->getCookieName(), $this->loginView->getRequestName(),  $cookieExpiresIn);
-            setcookie($this->loginView->getCookiePassword(), $randomPassword,  $cookieExpiresIn);
-
-            $this->auth->saveAuthToDB($this->loginView->getRequestName(), $hashedPassword);
+            setcookie($this->loginView->getCookiePassword(), $randomPwd,  $cookieExpiresIn);
     }    
 
     private function isLoginFormValid($uid, $pwd) {
@@ -160,6 +166,8 @@ class UserController {
 
     public function logoutUser() {
         if ($this->loginView->userWantsToLogout() && $this->loginView->isLoggedIn()) {
+            setcookie($this->loginView->getCookieName(), "", time() - 3600);
+            setcookie($this->loginView->getCookiePassword(), "", time() - 3600);
             unset($_SESSION["username"]);
             $this->loginView->setMessage("Bye bye!");
         }
