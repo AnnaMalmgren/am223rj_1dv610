@@ -51,9 +51,13 @@ class LoginView {
 		if (isset($_SESSION['username'])) {
 			return TRUE;
 		} else if (!empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword])) {
-			$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
-			return $auth->AuthUser();
+			return $this->validateCookies ? TRUE : FALSE;
 		}
+	}
+
+	private function validateCookies() : Bool {
+		$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+		return $auth->AuthUser();
 	}
 
 	/**
