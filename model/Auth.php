@@ -2,34 +2,19 @@
 
 class Auth {
 
-    private $cookiePassword;
-    private $authUser;
-    private $cookieExpiresIn;
-    private $hashedPassword;
-
-    public function __construct($cookieName, $cookiePassword) {
-        $this->authUser = $cookieName;
-        $this->cookiePassword = $cookiePassword;
-    }
-
-    public function authUser() : Bool {
-        $user = $this->getAuthUserFromDB();
+    public function verifyUser($uid, $pwd) {
+        $user = $this->getAuthUserFromDB($uid);
         $currentDate = date("Y-m-d H:i:s", time());
- 
-       if($user['expireDate'] > $currentDate && $this->verifyPassword($user)) {
-           session_regenerate_id();
-           $_SESSION['username'] = $this->authUser;
-           return TRUE;
-       } else {
-           return FALSE;
-       }
+        $expireDate = $user['expireDate'];
+
+        //IMPLEMENT PASSWORD VERIFY!!  
+        
+        if($expireDate > $currentDate && $passwordCheck) {
+            $_SESSION['username'] = $uid;
+        }
     }
 
-    private function verifyPassword($user) : bool {
-        return password_verify($user['passwordHash'], $this->cookiePassword);
-    }
-
-    private function getAuthUserFromDB() {
+    private function getAuthUserFromDB($uid) {
         //require(__DIR__ . '/../dbproduction.php');
         require(__DIR__ . '/../dbsettings.php');
 
@@ -42,21 +27,22 @@ class Auth {
             exit();
         } 
         
-        mysqli_stmt_bind_param($stmt, 's', $this->authUser);
+        mysqli_stmt_bind_param($stmt, 's', $uid);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $userData = mysqli_fetch_assoc($result);
         return $userData;
     }
 
-    public function saveAuthToDB() {
+    public function saveAuthToDB($uid, $pwd) {
         //require(__DIR__ . '/../dbproduction.php');
         require(__DIR__ . '/../dbsettings.php');
 
-        $expireDate = date("Y-m-d H:i:s", $this->cookieExpiresIn);
+        $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
+        $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
-        if ($this->isAuthInDB()) {
-            return $this->updateAuthUser();
+        if ($this->isAuthInDB($uid)) {
+            return $this->updateAuthUser($uid);
         }
 
          $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
@@ -65,46 +51,36 @@ class Auth {
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
-             mysqli_stmt_bind_param($stmt, "sss", $this->authUser, $this->hashedPassword, $expireDate);
+             mysqli_stmt_bind_param($stmt, "sss", $uid, $pwd, $expireDate);
              mysqli_stmt_execute($stmt);
          }   
     }
 
-    private function updateAuthUser() {
+    private function updateAuthUser($uid) {
         //require(__DIR__ . '/../dbproduction.php');
         require(__DIR__ . '/../dbsettings.php');
 
-        $sql = "UPDATE auth_users SET expireDate = ? WHERE authUsername = ?";
+        $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
+
+        $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
+
+        $sql = "UPDATE auth_users SET expireDate = ? WHERE BINARY authUsername = ?";
          $stmt = mysqli_stmt_init($conn);
 
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
-             mysqli_stmt_bind_param($stmt, "ss", $expireDate, $this->authUser);
+             mysqli_stmt_bind_param($stmt, "ss", $expireDate, $uid);
              mysqli_stmt_execute($stmt);
          }   
 
     }
 
-    private function isAuthInDB() : bool {   
-        if ($this->getAuthUserFromDB()) {
+    private function isAuthInDB($uid) : bool {   
+        if ($this->getAuthUserFromDB($uid)) {
            return TRUE;
         } else {
            return FALSE;
         }
-    }
-
-
-    public function createCookies($cookieName, $cookiePassword) {
-        $this->cookieExpiresIn = time() + 3600 * 24;
-        $bytesLength = 16;
-        $randomPassword = bin2hex(random_bytes($bytesLength));
-        $this->hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
-
-        setcookie($cookieName, $this->authUser, $this->cookieExpiresIn, "/", "", TRUE, TRUE);
-        setcookie($cookiePassword, $randomPassword, $this->cookieExpiresIn, "/", "",  TRUE, TRUE);
-    }
-
-
-    
+    }   
 }

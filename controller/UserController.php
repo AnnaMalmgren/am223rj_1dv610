@@ -16,6 +16,7 @@ class UserController {
     public function __construct(RegisterView $registerView, LoginView $loginView) {
         $this->registerView = $registerView;
         $this->loginView = $loginView;
+        $this->auth = new Auth();
     }
 
     public function getUserIsRegistered() {
@@ -73,6 +74,15 @@ class UserController {
         }
     }
 
+    public function authUser() {
+        if($this->loginView->userWantsToAuthenticate() && !isset($_SESSION['username'])) {
+            $uid = $this->loginView->getCookieNameValue();
+            $pwd = $this->loginView->getCookiePasswordValue();
+
+            $this->auth->verifyUser($uid, $pwd);
+        }
+    }
+
     public function loginUser() {
         if ($this->loginView->userWantsToLogin()) {
 
@@ -80,7 +90,6 @@ class UserController {
             $loginPwd =  $this->loginView->getRequestPwd();
 
             try {
-
                $this->setLoginMessage();
 
                 if (!$this->isLoginFormValid($loginUid, $loginPwd)) {
@@ -88,15 +97,10 @@ class UserController {
                 }
 
                 $user = $this->loginView->getLoginUser();
-
                 $this->verifyLoginUser($user, $loginUid, $loginPwd);
-
-                $this->setAuthCookies($user, $loginUid, $loginPwd);
-
-                $this->loginView->setUserName($loginUid);
-
                 $this->startNewSession($loginUid);
-                
+                $this->setAuthCookies($user);
+                $this->loginView->setUserName($loginUid);
 
             } catch(\Exception $e) {
                 $message = $e->getMessage();
@@ -113,13 +117,24 @@ class UserController {
         }
     }
 
-    private function setAuthCookies($user, $loginUid, $loginPwd) {
+    private function setAuthCookies($user) {
         if ($this->loginView->rememberMe() && $user) {
-            $this->auth = new Auth($loginUid, $loginPwd);
-            $this->auth->createCookies($this->loginView->getCookieName(), $this->loginView->getCookiePassword());
-            $this->auth->saveAuthToDB();
+            $this->createCookies();
          }
     }
+
+         private function createCookies() {
+            $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
+
+            $bytesLength = 12;
+            $randomPassword = bin2hex(random_bytes($bytesLength));
+            $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+    
+            setcookie($this->loginView->getCookieName(), $this->loginView->getRequestName(),  $cookieExpiresIn);
+            setcookie($this->loginView->getCookiePassword(), $randomPassword,  $cookieExpiresIn);
+
+            $this->auth->saveAuthToDB($this->loginView->getRequestName(), $hashedPassword);
+    }    
 
     private function isLoginFormValid($uid, $pwd) {
         if (empty($uid)) {
@@ -145,8 +160,7 @@ class UserController {
 
     public function logoutUser() {
         if ($this->loginView->userWantsToLogout() && $this->loginView->isLoggedIn()) {
-            session_unset();
-            session_destroy();
+            unset($_SESSION["username"]);
             $this->loginView->setMessage("Bye bye!");
         }
     }

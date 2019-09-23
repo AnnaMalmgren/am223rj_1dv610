@@ -1,6 +1,5 @@
 <?php
 require_once(__DIR__ . '/../model/User.php');
-require_once(__DIR__ . '/../model/Auth.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -13,7 +12,6 @@ class LoginView {
 	private static $messageId = 'LoginView::Message';
 	private $message = "";
 	private $username = "";
-	private $isAuth = FALSE;
 
 	/**
 	 * Create HTTP response
@@ -36,6 +34,10 @@ class LoginView {
 		return $response;
 	}
 
+	public function userWantsToAuthenticate() {
+		return !empty($_COOKIE[$this->getCookieName()]) && !empty($_COOKIE[$this->getCookiePassword()]);
+	  }
+
 	public function getRequestName() : string {
 		return trim($_POST[self::$name]);
 	}
@@ -49,22 +51,9 @@ class LoginView {
 	 * @return bool
 	 */
 	public function isLoggedIn() {
-		if ($this->isAuthCookiesSet()) {
-			$this->setIsAuth();
-		}
-
 		if (isset($_SESSION['username'])) {
 			return TRUE;
 		} 
-	}
-
-	private function setIsAuth() {
-		$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
-		$this->isAuth = $auth->AuthUser();
-	}
-
-	private function isAuthCookiesSet() : Bool {
-		return !empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword]);
 	}
 
 	/**
@@ -127,6 +116,19 @@ class LoginView {
 	public function getCookiePassword() {
 		return self::$cookiePassword;
 	}
+
+	public function getCookieNameValue() {
+		if (isset($_COOKIE[self::$cookieName])) {
+			return $_COOKIE[self::$cookieName];
+		}
+	}
+
+	public function getCookiePasswordValue() {
+		if (isset($_COOKIE[self::$cookiePassword])) {
+			return $_COOKIE[self::$cookiePassword];
+		}
+	}
+
 
 
 	/**

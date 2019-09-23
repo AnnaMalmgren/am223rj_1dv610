@@ -4,6 +4,7 @@ require_once('view/DateTimeView.php');
 require_once('view/LayoutView.php');
 require_once('view/RegisterView.php');
 require_once('controller/UserController.php');
+require_once('model/Auth.php');
 
 class App {
     private $view;
@@ -11,6 +12,7 @@ class App {
     private $loginForm;
     private $timeView;
     private $controller;
+    private $auth;
 
     public function __construct() {
         $this->loginView = new LoginView();
@@ -23,18 +25,19 @@ class App {
 
     public function runApp() {
         session_start();
+        echo $_SESSION['username'];
         $this->changeState();
         $this->renderViews();
     }
 
     private function changeState() {
+        $this->controller->AuthUser();
         $this->controller->registerUser();
         $this->controller->loginUser();
         $this->controller->logoutUser();
     }
 
-    private function renderViews() {
-        
+    private function renderViews() {   
         if ($this->controller->getUserIsRegistered()) {
             $this->renderLoginView(); 
         } else {
