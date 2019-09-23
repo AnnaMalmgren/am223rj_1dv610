@@ -95,27 +95,18 @@ class LoginUser {
         }
     }
 
-    private function authPasswordVerify($cookiepassword) {
-        return password_verify($_COOKIE[$cookiepassword], $this->hashedPassword);
+    public function getHashedPassword () {
+        return $this->hashedPassword;
     }
 
-    private function authExpireDate() {
+    public function getExpireDate() {
         $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
         $currentDate = date("Y-m-d H:i:s", time());
         $authUser = $this->getUserFromDB($this->username, $sql);
 
-        if ($authUser['expireDate'] > $currentDate ) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return ($authUser['expireDate'];
     }
 
-    public function validateCookies($cookiepassword) : BOOL {
-        if ($this->authExpireDate() && $this->authPasswordVerify($cookiepassword)) {
-            return TRUE;
-        }
-    }
 
     public function createCookies($cookieName, $cookiePassword) {
         $this->cookieExpiresIn = time() + 3600 * 24;

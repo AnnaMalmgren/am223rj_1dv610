@@ -39,8 +39,25 @@ class LoginController {
         return isset($_COOKIE[$this->view->getCookiePassword()]);
     }
 
+    private function authPasswordVerify() {
+        return password_verify($_COOKIE[$this->view->getCookiePassword()], $this->user->getHashedPassword);
+    }
+
+    private function authExpireDate() {
+        $currentDate = date("Y-m-d H:i:s", time());
+
+        if ($this->user->getExpireDate() > $currentDate ) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+
     public function validateAuthCookies() : bool {
-        return $this->user->validateCookies($this->view->getCookiePassword());
+        if ($this->authExpireDate() && $this->authPasswordVerify()) {
+            return TRUE;
+        }
     }
 
     public function logoutUser () {
