@@ -25,7 +25,6 @@ class App {
 
     public function runApp() {
         session_start();
-        echo $_SESSION['username'];
         $this->changeState();
         $this->renderViews();
     }
