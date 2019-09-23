@@ -13,6 +13,7 @@ class LoginView {
 	private static $messageId = 'LoginView::Message';
 	private $message = "";
 	private $username = "";
+	private $isAuth = FALSE;
 
 	/**
 	 * Create HTTP response
@@ -47,13 +48,20 @@ class LoginView {
 	 * Checks if SESSION variable username is set.
 	 * @return bool
 	 */
-	public function isLoggedIn () {
+	public function isLoggedIn() {
 		if (isset($_SESSION['username'])) {
 			return TRUE;
 		} else if ($this->isAuthCookiesSet()) {
-			$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
-			return $auth->AuthUser();
+			$this->setIsAuth();
+			if ($this->isAuth) {
+				return TRUE;
+			}
 		}
+	}
+
+	private function setIsAuth() {
+		$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+		$this->isAuth = $auth->AuthUser();
 	}
 
 	private function isAuthCookiesSet() : Bool {
