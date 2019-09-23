@@ -3,16 +3,12 @@
 require_once('RegisterUserException.php');
 
 class User {
-    private static $minUidLenght = 3;
-    private static $minPwdLength = 6;
     private $username = null;
     private $password = null;
 
-    public function __construct($username, $password, $repeatedPassword) {
-        if ($this->isFormValid($username, $password, $repeatedPassword)) {
+    public function __construct($username, $password) {
             $this->username = $username;
             $this->password = $this->hashPassword($password);
-        }
     }
 
     private function isFormValid($username, $password, $repeatedPassword) : bool {
@@ -26,58 +22,54 @@ class User {
             throw new RegisterUserException('Password has too few characters, at least 6 characters.');
         } else if ($password !== $repeatedPassword) {
             throw new RegisterUserException('Passwords do not match.');
-        } else if ($this->doesUserExits($username)) {
+        } else if ($this->getUserFromDB($username)) {
             throw new RegisterUserException('User exists, pick another username.');
         } else {
             return TRUE;
         }
     }
-    
-    
-    /**
-     * Gets the username.
-     * @return string
-     */
-    public function getUsername () : string {
-        return $this->username;
+
+    private function createNewSession() {
+        session_regenerate_id();
+        $_SESSION['username'] = $this->username;
     }
     
-    /**
-     * Hashes the password
-     * @return string
-     */
     private function hashPassword($password) : string {
         return password_hash($password, PASSWORD_DEFAULT); 
      }
 
-    /**
-     * Check entered username already exits in the database.
-     * @return int the number of rows with the entered username.
-     */
-    private function doesUserExits($username) : bool {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+     public function verifyPassword ($username, $password) : bool {
+        $sql = "SELECT * FROM users WHERE BINARY username=?";
+        $userData = $this->getUserFromDB($username, $sql);
 
-        $sql = "SELECT username, password FROM users WHERE BINARY username=?";
+        return password_verify($password, $userData['password']);       
+    }
+
+
+     public function getUserFromDB($username) {
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
+
+        $sql = "SELECT * FROM users WHERE BINARY username=?";
+
         $stmt = mysqli_stmt_init($conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
-            throw new Exception('Something went wrong.');
-        } else {
-            mysqli_stmt_bind_param($stmt, "s", $username);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_store_result($stmt);
-            return $numOfUsers = mysqli_stmt_num_rows($stmt);
-        }
+            throw new Exception('Something went wrong in getUser.');
+            exit();
+        } 
+        
+        mysqli_stmt_bind_param($stmt, 's', $username);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $userData = mysqli_fetch_assoc($result);
+        return $userData;
     }
 
-    /**
-     * Saves a user to the DB
-     * @return void
-     */
+
     public function saveUserToDB() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);

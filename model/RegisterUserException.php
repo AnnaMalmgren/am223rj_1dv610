@@ -1,3 +1,3 @@
 <?php
 
-class RegisterUserException extends Exception {}
+class RegisterUserException extends Exception{}

@@ -30,8 +30,8 @@ class Auth {
     }
 
     private function getAuthUserFromDB() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
 
@@ -50,8 +50,8 @@ class Auth {
     }
 
     public function saveAuthToDB() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $expireDate = date("Y-m-d H:i:s", $this->cookieExpiresIn);
 
@@ -71,8 +71,8 @@ class Auth {
     }
 
     private function updateAuthUser() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $sql = "UPDATE auth_users SET expireDate = ? WHERE authUsername = ?";
          $stmt = mysqli_stmt_init($conn);
