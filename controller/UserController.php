@@ -74,22 +74,27 @@ class UserController {
         }
     }
 
+    private function verifyCookie() {
+        $uid = $this->loginView->getCookieNameValue();
+        $pwd = $this->loginView->getCookiePasswordValue();
+
+        $expireCheck = $this->auth->verifyExpireDate($uid);
+        $pwdTokenCheck = $this->auth->verifyPwdToken($uid, $pwd);
+        if (!$expireCheck || !$pwdTokenCheck ) {
+            throw new LoginUserException('Wrong information in cookies');
+        }
+    }
+
     public function authUser() {
         if($this->loginView->userWantsToAuthenticate() && !isset($_SESSION['username'])) {
-
-            $uid = $this->loginView->getCookieNameValue();
-            $pwd = $this->loginView->getCookiePasswordValue();
-
-            $expireCheck = $this->auth->verifyExpireDate($uid);
-            $pwdTokenCheck = $this->auth->verifyPwdToken($uid, $pwd);
-
-            if (!$expireCheck || !$pwdTokenCheck ) {
-                return;
+            try {
+                $this->verifyCookie();
+                $this->loginView->setWelcomeMessage();
+                $_SESSION['username'] = $uid;
+            } catch (\Exception $e) {
+                $message = $e->getMessage();
+                $this->registerView->setMessage($message);
             }
-
-            $this->loginView->setWelcomeMessage();
-
-            $_SESSION['username'] = $uid;
         }
     }
 
