@@ -37,10 +37,7 @@ class App {
     }
 
     private function renderViews() {
-        if ($this->loginController->isCookieNameSet() && $this->loginController->isCookiePasswordSet()) {
-            $this->loginController->validateAuthCookies() ? 
-            $this->renderLoginView() :  $this->renderRegisterView();
-        } else if ($this->registerController->getUserIsRegistered()) {
+        if ($this->registerController->getUserIsRegistered()) {
             $this->renderLoginView(); 
         } else {
             $this->view->userClicksRegisterLink() ? 
@@ -55,10 +52,10 @@ class App {
     }
 
     private function renderLoginView() {
-        $link = '<a href="?register">Register a new user</a>';
+        $regLink = '<a href="?register">Register a new user</a>';
         
         if(!$this->loginView->isLoggedIn()) {
-            $this->view->setLink($link);
+            $this->view->setLink($regLink);
         }
        
         $this->view->render($this->loginView->isLoggedIn(), $this->loginView, $this->timeView);

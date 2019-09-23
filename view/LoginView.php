@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../model/LoginUser.php');
+require_once(__DIR__ . '/../model/Auth.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -38,7 +39,7 @@ class LoginView {
 		return trim($_POST[self::$name]);
 	}
 
-	private function getRequestPwd() : string {
+	public function getRequestPwd() : string {
 		return trim($_POST[self::$password]);
 	}
 	
@@ -46,8 +47,13 @@ class LoginView {
 	 * Checks if SESSION variable username is set.
 	 * @return bool
 	 */
-	public function isLoggedIn () : bool {
-		return isset($_SESSION['username']);
+	public function isLoggedIn () {
+		if (isset($_SESSION['username'])) {
+			return TRUE;
+		} else if (!empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword])) {
+			$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+			return $auth->AuthUser();
+		}
 	}
 
 	/**
