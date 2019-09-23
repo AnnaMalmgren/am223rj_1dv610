@@ -74,8 +74,7 @@ class UserController {
         }
     }
 
-    private function verifyCookie() {
-        $uid = $this->loginView->getCookieNameValue();
+    private function verifyCookie($uid) {
         $pwd = $this->loginView->getCookiePasswordValue();
 
         $expireCheck = $this->auth->verifyExpireDate($uid);
@@ -88,7 +87,9 @@ class UserController {
     public function authUser() {
         if($this->loginView->userWantsToAuthenticate() && !isset($_SESSION['username'])) {
             try {
-                $this->verifyCookie();
+                $uid = $this->loginView->getCookieNameValue();
+                
+                $this->verifyCookie($uid);
                 $this->loginView->setWelcomeMessage();
                 $_SESSION['username'] = $uid;
             } catch (\Exception $e) {
