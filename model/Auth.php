@@ -3,11 +3,6 @@
 class Auth {
     public function verifyPwdToken($uid, $pwd) : bool {
         $userData = $this->getAuthUserFromDB($uid);
-
-        if(password_verify($pwd, $userData['passwordHash']) ){
-            echo "THIS TOO";
-        }
-
         return password_verify($pwd, $userData['passwordHash']);
     }
 
