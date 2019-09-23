@@ -2,6 +2,7 @@
 
 class LoginController {
     private $view;
+    private $user;
 
     public function __construct(LoginView $view) {
         $this->view = $view;
@@ -15,7 +16,7 @@ class LoginController {
                     $this->view->setMessage("Welcome");
                 }
 
-                $user = $this->view->getLoginUser();
+                $this->user = $this->view->getLoginUser();
 
                 if ($this->view->rememberMe() && $user) {
                    $user->createCookies($this->view->getCookieName(), $this->view->getCookiePassword());
