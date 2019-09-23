@@ -50,7 +50,7 @@ class LoginView {
 	public function isLoggedIn () {
 		if (isset($_SESSION['username'])) {
 			return TRUE;
-		} else if (!empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword])) {
+		} else if (isset($_COOKIE[self::$cookieName]) && isset($_COOKIE[self::$cookiePassword])) {
 			$auth = new Auth($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
 			return $auth->AuthUser();
 		}
