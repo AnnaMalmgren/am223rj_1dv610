@@ -30,8 +30,8 @@ class LoginUser {
     }
 
     public function getUserFromDB($uid) {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT * FROM users WHERE BINARY username=?";
 
