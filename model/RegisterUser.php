@@ -2,53 +2,49 @@
 
 require_once('RegisterUserException.php');
 
-class User {
-    private $username = null;
-    private $password = null;
+class RegisterUser {
+    private $uid;
+    private $hashedPwd;
+    private $minUidLength = 3;
+    private $minPwdLength = 6;
 
-    public function __construct($username, $password) {
-            $this->username = $username;
-            $this->password = $this->hashPassword($password);
+
+    public function __construct($username, $password, $passwordRepeat) {
+        if ($this->isFormValid($username, $password, $passwordRepeat)) {
+            $this->uid = $username;
+            $this->hashedPwd = $this->hashPassword($password);
+        }
     }
 
-    private function isFormValid($username, $password, $repeatedPassword) : bool {
-        if (empty($username) && empty($password)) {
+    public function getUsername() {
+        return $this->uid;
+    }
+
+    private function isFormValid($uid, $pwd, $pwdRepeat) : bool {
+        if (empty($uid) && empty($pwd)) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
-        } else if (strlen($username) < self::$minUidLenght) {
+        } else if (strlen($uid) < $this->minUidLength) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.');
-        } else if ($username !== htmlentities($username)) {
+        } else if ($uid !== htmlentities($uid)) {
             throw new RegisterUserException('Username contains invalid characters.');
-        } else if (strlen($password) < self::$minPwdLength) {
+        } else if (strlen($pwd) < $this->minPwdLength) {
             throw new RegisterUserException('Password has too few characters, at least 6 characters.');
-        } else if ($password !== $repeatedPassword) {
+        } else if ($pwd !== $pwdRepeat) {
             throw new RegisterUserException('Passwords do not match.');
-        } else if ($this->getUserFromDB($username)) {
+        } else if ($this->getUserFromDB($uid)) {
             throw new RegisterUserException('User exists, pick another username.');
         } else {
             return TRUE;
         }
     }
 
-    private function createNewSession() {
-        session_regenerate_id();
-        $_SESSION['username'] = $this->username;
-    }
-    
-    private function hashPassword($password) : string {
-        return password_hash($password, PASSWORD_DEFAULT); 
+    private function hashPassword($pwd) : string {
+        return password_hash($pwd, PASSWORD_DEFAULT); 
      }
 
-     public function verifyPassword ($username, $password) : bool {
-        $sql = "SELECT * FROM users WHERE BINARY username=?";
-        $userData = $this->getUserFromDB($username, $sql);
-
-        return password_verify($password, $userData['password']);       
-    }
-
-
-     public function getUserFromDB($username) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+    public function getUserFromDB($uid) {
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
 
         $sql = "SELECT * FROM users WHERE BINARY username=?";
 
@@ -59,17 +55,16 @@ class User {
             exit();
         } 
         
-        mysqli_stmt_bind_param($stmt, 's', $username);
+        mysqli_stmt_bind_param($stmt, 's', $uid);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $userData = mysqli_fetch_assoc($result);
         return $userData;
     }
 
-
     public function saveUserToDB() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
  
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
          $stmt = mysqli_stmt_init($conn);
@@ -81,5 +76,7 @@ class User {
              mysqli_stmt_execute($stmt);
          }   
     }
+
+
 
 }

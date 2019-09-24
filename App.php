@@ -3,16 +3,16 @@ require_once('view/LoginView.php');
 require_once('view/DateTimeView.php');
 require_once('view/LayoutView.php');
 require_once('view/RegisterView.php');
-require_once('controller/UserController.php');
-require_once('model/Auth.php');
+require_once('controller/RegUserController.php');
+require_once('controller/LoginUserController.php');
 
 class App {
     private $view;
     private $registerForm;
     private $loginForm;
     private $timeView;
-    private $controller;
-    private $auth;
+    private $regController;
+    private $LoginController;
 
     public function __construct() {
         $this->loginView = new LoginView();
@@ -20,7 +20,8 @@ class App {
         $this->timeView = new DateTimeView();
         $this->view = new LayoutView();
 
-        $this->controller = new UserController($this->regView, $this->loginView);
+        $this->regController = new RegUserController($this->regView, $this->loginView);
+        $this->loginController = new LoginUserController($this->loginView);
     }
 
     public function runApp() {
@@ -30,14 +31,14 @@ class App {
     }
 
     private function changeState() {
-        $this->controller->AuthUser();
-        $this->controller->registerUser();
-        $this->controller->loginUser();
-        $this->controller->logoutUser();
+        $this->loginController->authUser();
+        $this->regController->registerUser();
+        $this->loginController->loginUser();
+        $this->loginController->logoutUser();
     }
 
     private function renderViews() {   
-        if ($this->controller->getUserIsRegistered()) {
+        if ($this->regController->getUserIsRegistered()) {
             $this->renderLoginView(); 
         } else {
             $this->view->userClicksRegisterLink() ? 

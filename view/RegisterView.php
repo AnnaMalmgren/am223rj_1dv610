@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../model/User.php');
+require_once(__DIR__ . '/../model/RegisterUser.php');
 
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
@@ -63,8 +63,8 @@ class RegisterView extends LoginView {
 	 * Creates an User object with entered input
 	 * @return User 
 	 */
-	public function getUser() : User {
-		return new User($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
+	public function getUser() : RegisterUser {
+		return new RegisterUser($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
 	}
 	
 

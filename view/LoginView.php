@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../model/User.php');
+require_once(__DIR__ . '/../model/LoginUser.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -81,8 +81,8 @@ class LoginView {
 	}
 	
 	
-	public function getLoginUser() : User {
-		return new User($this->getRequestName(), $this->getRequestPwd());
+	public function getLoginUser() : LoginUser {
+		return new LoginUser($this->getRequestName(), $this->getRequestPwd());
 	}
 	
 	/**
