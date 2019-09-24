@@ -72,7 +72,7 @@ class RegisterUser {
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
-             mysqli_stmt_bind_param($stmt, "ss", $this->username, $this->password);
+             mysqli_stmt_bind_param($stmt, "ss", $this->uid, $this->hashedPwd);
              mysqli_stmt_execute($stmt);
          }   
     }
