@@ -8,7 +8,7 @@
     public function __construct()
     {
         require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        //require(__DIR__ . '/../dbsettings.php');
         $this->conn = $conn;
     }
 
