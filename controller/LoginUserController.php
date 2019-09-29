@@ -36,30 +36,39 @@ class LoginUserController {
     }
 
     public function authUser() {
-      if($this->view->userWantsToAuthenticate()) {
+        $uid = $this->view->getCookieNameValue(); 
+        if (!$this->auth->verifyUserAgent($uid)) {
+           $this->logoutUnAuth();
+            return;
+        }
+        // check if cookies are set and no session is in use.
+        if($this->view->userWantsToAuthenticate()) {
             try {
                 $uid = $this->view->getCookieNameValue();
-
-                if (!$this->auth->verifyUserAgent($uid)) {
-                    setcookie($this->view->getCookieName(), "", time() - 3600);
-                    setcookie($this->view->getCookiePassword(), "", time() - 3600);
-                    if (isset($_SESSION[self::$sessionId])) {
-                        unset($_SESSION[self::$sessionId]);
-                    }
-                    return;
-                }
                 $this->verifyCookies($uid);
-                if(!isset($_SESSION[self::$sessionId])) {
-                $this->view->setWelcomeMessage();
-                $this->startNewSession($uid);
+                if (!$this->auth->verifyUserAgent($uid)) {
+                    $this->logoutUnAuth();
+                     return;
+                 }
+                if (!isset($_SESSION[self::$sessionId])) {
+                    $this->view->setWelcomeMessage();
+                    $this->startNewSession($uid);
                 }
-
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
             }
         }
     }
+
+    private function logoutUnAuth() {
+        setcookie($this->view->getCookieName(), "", time() - 3600);
+        setcookie($this->view->getCookiePassword(), "", time() - 3600);
+        if (isset($_SESSION[self::$sessionId])) {
+            unset($_SESSION[self::$sessionId]);
+        }
+    }
+
 
 
     public function logoutUser() {
