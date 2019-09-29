@@ -10,7 +10,7 @@ ini_set('display_errors', 'On');
 ini_set('session.use_only_cookies', 'On');
 ini_set('session.use_strict_mode', 'On');
 ini_set('session.cookie_httponly', 'On');
-//ini_set('session.cookie_secure', 'On');
+ini_set('session.cookie_secure', 'On');
 ini_set('session.cookie_samesite', 'Strict');
 ini_set( 'session.use_trans_sid', FALSE );
 

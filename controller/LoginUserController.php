@@ -44,6 +44,9 @@ class LoginUserController {
                 if (!$this->auth->verifyUserAgent($uid)) {
                     setcookie($this->view->getCookieName(), "", time() - 3600);
                     setcookie($this->view->getCookiePassword(), "", time() - 3600);
+                    if (isset($_SESSION[self::$sessionId])) {
+                        unset($_SESSION[self::$sessionId]);
+                    }
                 } else {
                     $this->verifyCookies($uid);
                     $this->view->setWelcomeMessage();
