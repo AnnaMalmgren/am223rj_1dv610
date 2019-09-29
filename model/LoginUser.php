@@ -10,7 +10,7 @@ class LoginUser {
 
     public function __construct($username, $password) {
         require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbsettings.php');
         $this->conn = $conn;
 
         if ($this->isFormValid($username, $password)) {

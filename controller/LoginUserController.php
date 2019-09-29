@@ -42,7 +42,7 @@ class LoginUserController {
 
     public function getLoginUser() {
         $this->loginUser();
-        if (isset($_SESSION[self::$tempSessionID]))
+        if (isset($_SESSION[self::$tempSessionID]) && !$this->view->isLoggedIn())
         {
             $this->view->setMessage("Welcome");
             $this->startNewSession($_SESSION[self::$tempSessionID]);
