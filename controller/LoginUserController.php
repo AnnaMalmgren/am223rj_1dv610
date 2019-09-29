@@ -74,7 +74,7 @@ class LoginUserController {
     private function setWelcomeMsg() {
         isset($_SESSION[self::$msg]) ? 
             $this->view->setMessage($_SESSION[self::$msg]) : 
-            $this->view->setMessage("Welcome back with cookies");
+            $this->view->setMessage("Welcome back with cookie");
     }
 
     public function logoutUser() {
