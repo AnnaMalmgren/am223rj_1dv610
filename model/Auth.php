@@ -25,6 +25,11 @@
         return $expireDate > $currentDate;
     }
 
+    public function verifyUserAgent($uid) : bool {
+        $userData = $this->getAuthUserFromDB($uid);
+        return $userData['user_agent'] === $_SERVER['HTTP_USER_AGENT'];
+    }
+
     private function getAuthUserFromDB($uid) {
         $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
 
@@ -45,35 +50,36 @@
     public function saveAuthToDB($uid, $pwd) {
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
         
         if ($this->isAuthInDB($uid)) {
             //if user already exist in DB update auth info for user.
-            return $this->updateAuthUser($uid, $pwd);
+            return $this->updateAuthUser($uid, $pwd, $userAgent);
         }
 
-         $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
+         $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate, user_agent) VALUES(?, ?, ?, ?)";
          $stmt = mysqli_stmt_init($this->conn);
 
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";
          } else {
-             mysqli_stmt_bind_param($stmt, "sss", $uid, $pwd, $expireDate);
+             mysqli_stmt_bind_param($stmt, "ssss", $uid, $pwd, $expireDate, $userAgent);
              mysqli_stmt_execute($stmt);
          }   
     }
 
-    private function updateAuthUser($uid, $pwd) {
+    private function updateAuthUser($uid, $pwd, $userAgent) {
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
-        $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ? WHERE BINARY authUsername = ?";
+        $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ?, userAgent = ? WHERE BINARY authUsername = ?";
         $stmt = mysqli_stmt_init($this->conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
             return "Something went wrong";
         }
 
-        mysqli_stmt_bind_param($stmt, "sss", $expireDate, $pwd, $uid);
+        mysqli_stmt_bind_param($stmt, "sss", $expireDate, $pwd, $userAgent, $uid);
         mysqli_stmt_execute($stmt);  
     }
 

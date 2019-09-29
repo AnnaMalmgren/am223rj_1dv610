@@ -53,12 +53,6 @@ class LoginUser {
         return $userData;
     }
 
-    private function startNewSession($uid) {
-        session_regenerate_id();
-        $_SESSION['username'] = $uid;
-    }
-
-
     public function verifyPassword ($uid, $pwd) : bool {
         $userData = $this->getUserFromDB($uid);
         return password_verify($pwd, $userData['password']);       

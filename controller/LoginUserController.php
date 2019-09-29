@@ -40,8 +40,11 @@ class LoginUserController {
         if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
                 $uid = $this->view->getCookieNameValue(); 
-                $this->verifyCookies($uid);
-                $this->startAuthSession($uid);
+                if ($this->auth->verifyUserAgent($uid)) {
+                    $this->verifyCookies($uid);
+                    $this->view->setWelcomeMessage();
+                    $this->startNewSession($uid);
+                }
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
@@ -87,28 +90,8 @@ class LoginUserController {
         setcookie($this->view->getCookiePassword(), $randomPwd,  $this->cookieExpiresIn);
     }
 
-    private function sessionUserAgent() {
-        if(!isset($_SESSION[self::$sessionAgent])) { 
-            return FALSE; 
-        }
-        if(!isset($_SERVER['HTTP_USER_AGENT'])) { 
-            return FALSE; 
-        }
-
-        return ($_SESSION[self::$sessionAgent] === $_SERVER['HTTP_USER_AGENT']);
-    }
-
-    private function startAuthSession($uid) {
-        if ($this->sessionUserAgent()) {
-            session_regenerate_id();
-            $_SESSION[self::$sessionId] = $uid;
-            $this->view->setWelcomeMessage();
-        }
-    }
-
     private function startNewSession($uid) {
         session_regenerate_id();
         $_SESSION[self::$sessionId] = $uid;
-        $_SESSION[self::$sessionAgent] = $_SERVER['HTTP_USER_AGENT'];
     }
 }
