@@ -36,22 +36,23 @@ class LoginUserController {
     }
 
     public function authUser() {
-      if ($this->view->userwantsToAuthenticate()) {
-        $uid = $this->view->getCookieNameValue(); 
-
-        if (!$this->auth->verifyUserAgent($uid)) {
-            setcookie($this->view->getCookieName(), "", time() - 3600);
-            setcookie($this->view->getCookiePassword(), "", time() - 3600);
-            if (isset($_SESSION[self::$sessionId])) {
-                unset($_SESSION[self::$sessionId]);
-            }
-        }
-      } else if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
+      if($this->view->userWantsToAuthenticate()) {
             try {
                 $uid = $this->view->getCookieNameValue();
+
+                if (!$this->auth->verifyUserAgent($uid)) {
+                    setcookie($this->view->getCookieName(), "", time() - 3600);
+                    setcookie($this->view->getCookiePassword(), "", time() - 3600);
+                    if (isset($_SESSION[self::$sessionId])) {
+                        unset($_SESSION[self::$sessionId]);
+                    }
+                    return;
+                }
                 $this->verifyCookies($uid);
+                if(!isset($_SESSION[self::$sessionId])) {
                 $this->view->setWelcomeMessage();
                 $this->startNewSession($uid);
+                }
 
             } catch (\Exception $e) {
                 $message = $e->getMessage();
