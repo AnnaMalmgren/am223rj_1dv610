@@ -26,7 +26,7 @@ class LoginUserController {
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
-                $this->setSessionUserInfo();
+                $this->setSessionUserAgent();
                 $this->view->setUserName($user->getUsername());
             } 
         } catch (\Exception $e) {
@@ -36,10 +36,9 @@ class LoginUserController {
     }
 
     public function authUser() {
-        if (!$this->validateSessionInfo()) {
-            return $this->logoutUser();
+        if (!$this->sessionUserAgent()) {
+            return;
         }
-
         // check if cookies are set and no session is in use.
         if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
@@ -61,6 +60,7 @@ class LoginUserController {
             setcookie($this->view->getCookieName(), "", time() - 3600);
             setcookie($this->view->getCookiePassword(), "", time() - 3600);
             unset($_SESSION[self::$sessionId]);
+            unset($_SESSION['user_agent']);
             $this->view->setMessage("Bye bye!");
         }
     }
@@ -91,18 +91,19 @@ class LoginUserController {
         setcookie($this->view->getCookiePassword(), $randomPwd,  $this->cookieExpiresIn);
     }
 
-    private function setSessionUserInfo() {
-        $_SESSION['HTTP_USER_AGENT'] = md5($_SERVER['HTTP_USER_AGENT']);
+    private function setSessionUserAgent() {
+        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
     }
 
-    private function validateSessionInfo() {
-        if (isset($_SESSION['HTTP_USER_AGENT'])) {
-            if ($_SESSION['HTTP_USER_AGENT'] != md5($_SERVER['HTTP_USER_AGENT'])) {
-                return FALSE;
-            } else {
-                return TRUE;
-            }
+    private function sessionUserAgent() {
+        if(!isset($_SESSION['user_agent'])) { 
+            return FALSE; 
         }
+        if(!isset($_SERVER['HTTP_USER_AGENT'])) { 
+            return FALSE; 
+        }
+
+        return ($_SESSION['user_agent'] === $_SERVER['HTTP_USER_AGENT']);
     }
 
     private function startNewSession($uid) {
