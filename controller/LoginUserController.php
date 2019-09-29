@@ -9,6 +9,7 @@ class LoginUserController {
     private $view;
     private $auth;
     private static $sessionId = 'username';
+    private static $sessionAgent = 'user_agent';
     private $bytesLength = 12;
     private  $cookieExpiresIn;
 
@@ -22,12 +23,12 @@ class LoginUserController {
         try {
             if ($this->view->userWantsToLogin()) {
                 $user = $this->view->getLoginUser();
-                $this->setUserAgent();
                 $this->view->setWelcomeMessage();  
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
                 $this->view->setUserName($user->getUsername());
+                $this->setUserAgent();
             } 
         } catch (\Exception $e) {
             $message = $e->getMessage();
@@ -40,11 +41,10 @@ class LoginUserController {
         if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
                 $uid = $this->view->getCookieNameValue(); 
-                if ($this->sessionUserAgent()) {
-                    $this->verifyCookies($uid);
-                    $this->view->setWelcomeMessage();
-                    $this->startNewSession($uid);
-                }
+                $this->verifyCookies($uid);
+                $this->view->setWelcomeMessage();
+                $this->startNewSession($uid);
+                
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
@@ -91,14 +91,14 @@ class LoginUserController {
     }
 
     private function sessionUserAgent() {
-        if(!isset($_SESSION['user_agent'])) { 
+        if(!isset($_SESSION[self::$sessionAgent])) { 
             return FALSE; 
         }
         if(!isset($_SERVER['HTTP_USER_AGENT'])) { 
             return FALSE; 
         }
 
-        return ($_SESSION['user_agent'] === $_SERVER['HTTP_USER_AGENT']);
+        return ($_SESSION[self::$sessionAgent] === $_SERVER['HTTP_USER_AGENT']);
     }
 
     private function setUserAgent() {
