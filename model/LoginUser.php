@@ -1,11 +1,18 @@
 <?php 
 
+namespace Model;
+
 require_once('LoginUserException.php');
 
 class LoginUser {
     private $uid;
+    private $conn;
 
     public function __construct($username, $password) {
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
+        $this->conn = $conn;
+
         if ($this->isFormValid($username, $password)) {
             $this->uid = $username;
         }
@@ -30,15 +37,12 @@ class LoginUser {
     }
 
     public function getUserFromDB($uid) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
-
         $sql = "SELECT * FROM users WHERE BINARY username=?";
 
-        $stmt = mysqli_stmt_init($conn);
+        $stmt = mysqli_stmt_init($this->conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
-            throw new Exception('Something went wrong in getUser.');
+            throw new Exception('Something went wrong in mysqli stmt prepare');
             exit();
         } 
         
@@ -56,9 +60,7 @@ class LoginUser {
 
 
     public function verifyPassword ($uid, $pwd) : bool {
-        $sql = "SELECT * FROM users WHERE BINARY username=?";
-        $userData = $this->getUserFromDB($uid, $sql);
-
+        $userData = $this->getUserFromDB($uid);
         return password_verify($pwd, $userData['password']);       
     }
 

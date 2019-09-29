@@ -1,16 +1,21 @@
 <?php
+namespace Model;
 
 require_once('RegisterUserException.php');
 
 class RegisterUser {
     private $uid;
     private $hashedPwd;
+    private $conn;
     private $minUidLength = 3;
     private $minPwdLength = 6;
 
-
     public function __construct($username, $password, $passwordRepeat) {
-        if ($this->isFormValid($username, $password, $passwordRepeat)) {
+        //require(__DIR__ . '/../dbproduction.php');
+        require(__DIR__ . '/../dbsettings.php');
+        $this->conn = $conn;
+
+        if ($this->isUserValid($username, $password, $passwordRepeat)) {
             $this->uid = $username;
             $this->hashedPwd = $this->hashPassword($password);
         }
@@ -20,7 +25,7 @@ class RegisterUser {
         return $this->uid;
     }
 
-    private function isFormValid($uid, $pwd, $pwdRepeat) : bool {
+    private function isUserValid($uid, $pwd, $pwdRepeat) : bool {
         if (empty($uid) && empty($pwd)) {
             throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
         } else if (strlen($uid) < $this->minUidLength) {
@@ -43,15 +48,12 @@ class RegisterUser {
      }
 
     public function getUserFromDB($uid) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
-
         $sql = "SELECT * FROM users WHERE BINARY username=?";
 
-        $stmt = mysqli_stmt_init($conn);
+        $stmt = mysqli_stmt_init($this->conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
-            throw new Exception('Something went wrong in getUser.');
+            throw new \Exception('Something went wrong in getUser.');
             exit();
         } 
         
@@ -63,11 +65,8 @@ class RegisterUser {
     }
 
     public function saveUserToDB() {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
- 
          $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
-         $stmt = mysqli_stmt_init($conn);
+         $stmt = mysqli_stmt_init($this->conn);
  
          if (!mysqli_stmt_prepare($stmt, $sql)) {
              return "Something went wrong (sql error)";

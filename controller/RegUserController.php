@@ -1,12 +1,15 @@
 <?php 
 
+namespace Controller;
+
 class RegUserController {
     private $userIsRegistered = FALSE;
     private $view;
     private $loginView;
+    private $conn;
     private static $successMsg = "Registered new user.";
 
-    public function __construct(RegisterView $registerView, LoginView $loginView) {
+    public function __construct(\View\RegisterView $registerView, \View\LoginView $loginView) {
         $this->view = $registerView;
         $this->loginView = $loginView;
     }
@@ -18,6 +21,7 @@ class RegUserController {
     public function registerUser () {
         if($this->view->userWantsToRegister()) {
             try {
+                // creates user, throws exception if register form is invalid.
                 $user = $this->view->getUser();
                 $this->saveRegisteredUser($user);
             } catch (\Exception $e) {

@@ -1,4 +1,6 @@
 <?php
+namespace View;
+
 require_once(__DIR__ . '/../model/LoginUser.php');
 
 class LoginView {
@@ -23,7 +25,7 @@ class LoginView {
 	public function response() {
 		$message = $this->message;
 
-		$response = $this->generateLoginFormHTML($message);
+		$response;
 
         if ($this->isLoggedIn()) {
 			$response = $this->generateLogoutButtonHTML($message);
@@ -34,8 +36,8 @@ class LoginView {
 		return $response;
 	}
 
-	public function userWantsToAuthenticate() {
-		return !empty($_COOKIE[$this->getCookieName()]) && !empty($_COOKIE[$this->getCookiePassword()]);
+	public function userWantsToAuthenticate() : bool {
+		return !empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword]);
 	  }
 
 	public function getRequestName() : string {
@@ -46,10 +48,6 @@ class LoginView {
 		return trim($_POST[self::$password]);
 	}
 	
-	/**
-	 * Checks if SESSION variable username is set.
-	 * @return bool
-	 */
 	public function isLoggedIn() {
 		if (isset($_SESSION['username'])) {
 			return TRUE;
@@ -57,45 +55,36 @@ class LoginView {
 	}
 
 	/**
-	 * Checks if user clicked "remember me".
-	 * @return bool
+	 * Checks if user clicked "keep me logged in".
 	 */
 	public function rememberMe() : bool {
 		return isset($_POST[self::$keep]);
 	}
 
-	/**
-	 * Checks if user has clicked login.
-	 * @return bool 
-	 */
 	public function userWantsToLogin() : bool {
 		return isset($_POST[self::$login]);
 	}
 
-    /**
-	 * Checks if user has clicked logout.
-	 * @return bool 
-	 */
+
 	public function userWantsToLogout() : bool {
 		return isset($_POST[self::$logout]);
 	}
 	
 	
-	public function getLoginUser() : LoginUser {
-		return new LoginUser($this->getRequestName(), $this->getRequestPwd());
+	public function getLoginUser() : \Model\LoginUser {
+		return new \Model\LoginUser($this->getRequestName(), $this->getRequestPwd());
 	}
 	
-	/**
-	 * Sets message to be written to the user.
-	 * @return string
-	 */
+
 	public function setMessage($message) : string {
 		return $this->message = $message;
 	}
 
 	public function setWelcomeMessage() {
+		// user logged in with "keep me logged in
 		if (!$this->isLoggedIn() && $this->rememberMe()) {
 			$this->setMessage("Welcome and you will be remembered");
+		// user authenticated with cookies
 		} else if (!$this->isLoggedIn() && $this->userWantsToAuthenticate()) {
 			$this->setMessage("Welcome back with cookie");
 		} else if (!$this->isLoggedIn()) {
@@ -103,10 +92,6 @@ class LoginView {
 		}
 	}
 	
-	/**
-	 * Sets the username
-	 * @return string
-	 */
 	public function setUserName($username) {
 		$this->username = $username;
 	}
@@ -119,21 +104,21 @@ class LoginView {
 		}
 	}
 
-	public function getCookieName() {
+	public function getCookieName() : string {
 		return self::$cookieName;
 	}
 
-	public function getCookiePassword() {
+	public function getCookiePassword() : string {
 		return self::$cookiePassword;
 	}
 
-	public function getCookieNameValue() {
+	public function getCookieNameValue() : string {
 		if (isset($_COOKIE[self::$cookieName])) {
 			return $_COOKIE[self::$cookieName];
 		}
 	}
 
-	public function getCookiePasswordValue() {
+	public function getCookiePasswordValue() : string {
 		if (isset($_COOKIE[self::$cookiePassword])) {
 			return $_COOKIE[self::$cookiePassword];
 		}

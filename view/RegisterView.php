@@ -1,4 +1,6 @@
 <?php
+namespace View;
+
 require_once(__DIR__ . '/../model/RegisterUser.php');
 
 class RegisterView extends LoginView {
@@ -20,11 +22,9 @@ class RegisterView extends LoginView {
 	public function response() {
 	
 		$message = $this->message;
-		
 
-        $response = $this->generateRegisterFormHTML($message);
-        
-		return $response;
+        return $this->generateRegisterFormHTML($message);
+
 	}
 
 	public function getRequestName() : string {
@@ -39,18 +39,10 @@ class RegisterView extends LoginView {
 		return trim($_POST[self::$passwordRepeat]);
 	}
 
-	/**
-	 * Checks if user has clicked register.
-	 * @return bool 
-	 */
 	public function userWantsToRegister() : bool {
 		return isset($_POST[self::$register]);
 	}
 
-	/**
-	 * Checks if user wants to register and returns the entered username or an empty string.
-	 * @return string the user name entered or "".
-	 */
 	private function getFilteredName() : string {
 		if ($this->userWantsToRegister()) {
 			return strip_tags($this->getRequestName());
@@ -59,27 +51,17 @@ class RegisterView extends LoginView {
 		 }
 	}
 
-	/**
-	 * Creates an User object with entered input
-	 * @return User 
-	 */
-	public function getUser() : RegisterUser {
-		return new RegisterUser($this->getRequestName(), $this->getRequestPwd(), $this->getRequestPwdRepeat());
+	public function getUser() : \Model\RegisterUser {
+		$uid = $this->getRequestName();
+		$pwd = $this->getRequestPwd();
+		$pwdRepeat = $this->getRequestPwdRepeat();
+		return new \Model\RegisterUser($uid, $pwd, $pwdRepeat);
 	}
 	
-
-
-
-	/**
-	 * Sets a message to be printed to the user.
-	 * @param string the message to på written to the user.
-	 * @return string message to user.
-	 */
 	public function setMessage($message) : string {
 		return $this->message = $message;
 	}
 
-	
     /**
 	* Generate HTML code on the output buffer for the register form.
 	* @param $message, String output message

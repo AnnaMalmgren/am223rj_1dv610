@@ -15,13 +15,13 @@ class App {
     private $LoginController;
 
     public function __construct() {
-        $this->loginView = new LoginView();
-        $this->regView = new RegisterView();
-        $this->timeView = new DateTimeView();
-        $this->view = new LayoutView();
+        $this->loginView = new \View\LoginView();
+        $this->regView = new \View\RegisterView();
+        $this->timeView = new \View\DateTimeView();
+        $this->view = new \View\LayoutView();
 
-        $this->regController = new RegUserController($this->regView, $this->loginView);
-        $this->loginController = new LoginUserController($this->loginView);
+        $this->regController = new \Controller\RegUserController($this->regView, $this->loginView);
+        $this->loginController = new \Controller\LoginUserController($this->loginView);
     }
 
     public function runApp() {

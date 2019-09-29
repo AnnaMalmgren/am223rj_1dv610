@@ -1,3 +1,5 @@
 <?php
 
-class RegisterUserException extends Exception{}
+namespace Model;
+
+class RegisterUserException extends \Exception{}

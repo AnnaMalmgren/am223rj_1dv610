@@ -1,3 +1,3 @@
 <?php
-
-class LoginUserException extends Exception {}
+namespace Model;
+class LoginUserException extends \Exception {}
