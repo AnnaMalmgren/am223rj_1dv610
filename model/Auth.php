@@ -79,7 +79,7 @@
             return "Something went wrong";
         }
 
-        mysqli_stmt_bind_param($stmt, "sss", $expireDate, $pwd, $userAgent, $uid);
+        mysqli_stmt_bind_param($stmt, "ssss", $expireDate, $pwd, $userAgent, $uid);
         mysqli_stmt_execute($stmt);  
     }
 
