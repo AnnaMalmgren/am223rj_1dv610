@@ -40,7 +40,7 @@ class LoginUserController {
             try {
                 $uid = $this->view->getCookieNameValue();
                 $this->verifyCookies($uid);
-                if (!$this->auth->verifyUserAgent($uid)) {
+                if (!$this->auth->verifyUserAgent($uid, $_SERVER['HTTP_USER_AGENT'])) {
                     $this->logoutUnAuth();
                      return;
                  }

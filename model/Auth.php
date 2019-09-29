@@ -25,11 +25,9 @@
         return $expireDate > $currentDate;
     }
 
-    public function verifyUserAgent($uid) : bool {
+    public function verifyUserAgent($uid, $serverAgent) : bool {
         $userData = $this->getAuthUserFromDB($uid);
-        echo $userData['user_agent'] . "<br>";
-        echo $_SERVER['HTTP_USER_AGENT'];
-        return $userData['user_agent'] === $_SERVER['HTTP_USER_AGENT'];
+        return $userData['user_agent'] === $serverAgent;
     }
 
     private function getAuthUserFromDB($uid) {
