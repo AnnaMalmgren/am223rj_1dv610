@@ -45,12 +45,8 @@ class LoginUserController {
             if (isset($_SESSION[self::$sessionId])) {
                 unset($_SESSION[self::$sessionId]);
             }
-            return;
         }
-      }
-
-        // check if cookies are set and no session is in use.
-        if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
+      } else if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
                 $uid = $this->view->getCookieNameValue();
                 $this->verifyCookies($uid);
