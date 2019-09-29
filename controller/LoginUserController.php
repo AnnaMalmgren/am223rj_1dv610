@@ -11,23 +11,27 @@ class LoginUserController {
     private static $sessionId = 'username';
     private static $sessionAgent = 'user_agent';
     private $bytesLength = 12;
-    private  $cookieExpiresIn;
+    private $cookieExpiresIn;
 
     public function __construct(\View\LoginView $loginView) {
         $this->view = $loginView;
         $this->auth = new \Model\Auth();
         $this->cookieExpiresIn = time() + (7 * 24 * 60 * 60);
     }
-
+    
+   
     public function loginUser() {
         try {
             if ($this->view->userWantsToLogin()) {
                 $user = $this->view->getLoginUser();
-                $this->view->setWelcomeMessage();  
+                $this->view->setWelcomeMessage();
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
                 $this->view->setUserName($user->getUsername());
+                //Redirect to keep form from resubmit.
+                header("Location: ?");    
+                exit;
             } 
         } catch (\Exception $e) {
             $message = $e->getMessage();
@@ -36,34 +40,26 @@ class LoginUserController {
     }
 
     public function authUser() {
-        if($this->view->userWantsToAuthenticate()) {
-            try {
+        try {
+            if ($this->view->userWantsToAuthenticate()) {
                 $uid = $this->view->getCookieNameValue();
-                $this->verifyCookies($uid);
-                if (!$this->auth->verifyUserAgent($uid, $_SERVER['HTTP_USER_AGENT'])) {
-                    $this->logoutUnAuth();
-                     return;
-                 }
-                if (!isset($_SESSION[self::$sessionId])) {
+                if (isset($_SESSION['username'])) {
+                    if (!$this->auth->verifyUserAgent($uid, $_SERVER['HTTP_USER_AGENT'])) {
+                        setcookie($this->view->getCookieName(), "", time() - 3600);
+                        setcookie($this->view->getCookiePassword(), "", time() - 3600);
+                        unset($_SESSION[self::$sessionId]);
+                    }
+                } else if (!isset($_SESSION['username'])) {
+                    $this->verifyCookies($uid);
                     $this->view->setWelcomeMessage();
                     $this->startNewSession($uid);
                 }
-            } catch (\Exception $e) {
-                $message = $e->getMessage();
-                $this->view->setMessage($message);
             }
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $this->view->setMessage($message);
         }
     }
-
-    private function logoutUnAuth() {
-        setcookie($this->view->getCookieName(), "", time() - 3600);
-        setcookie($this->view->getCookiePassword(), "", time() - 3600);
-        if (isset($_SESSION[self::$sessionId])) {
-            unset($_SESSION[self::$sessionId]);
-        }
-    }
-
-
 
     public function logoutUser() {
         //user can only logout if is logged in-
@@ -74,6 +70,11 @@ class LoginUserController {
             unset($_SESSION[self::$sessionId]);
             $this->view->setMessage("Bye bye!");
         }
+    }
+
+    private function verifyUserAgent() : bool {
+        $browserUserAgent = $_SERVER['HTTP_USER_AGENT'];
+        return $browserUserAgent === $this->userAgent;
     }
 
     private function verifyCookies($uid) {
@@ -89,10 +90,10 @@ class LoginUserController {
     private function checkRemberMe($user) {
         // User has checked "Keep me logged" in and entered correct login information.
         if ($this->view->rememberMe() && $user) {
+            $userAgent = $_SERVER['HTTP_USER_AGENT'];
         //generates cookies and saves auth info to DB.
             $randomPassword = bin2hex(random_bytes($this->bytesLength));
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
-            $userAgent = $_SERVER['HTTP_USER_AGENT'];
             $this->createCookies($randomPassword, $user->getUsername());
             $this->auth->saveAuthToDB($user->getUsername(), $hashedPassword, $userAgent);
          }
