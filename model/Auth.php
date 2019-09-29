@@ -72,7 +72,7 @@
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
-        $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ?, userAgent = ? WHERE BINARY authUsername = ?";
+        $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ?, user_agent = ? WHERE BINARY authUsername = ?";
         $stmt = mysqli_stmt_init($this->conn);
 
         if (!mysqli_stmt_prepare($stmt, $sql)) {
