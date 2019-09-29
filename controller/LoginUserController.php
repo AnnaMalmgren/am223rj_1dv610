@@ -66,7 +66,7 @@ class LoginUserController {
         $expireDateCheck = $this->auth->verifyExpireDate($uid);
         $pwdTokenCheck = $this->auth->verifyPwdToken($uid, $pwd);
         if (!$expireDateCheck || !$pwdTokenCheck ) {
-            throw new LoginUserException('Wrong information in cookies');
+            throw new \Model\LoginUserException('Wrong information in cookies');
         }
     }
     
