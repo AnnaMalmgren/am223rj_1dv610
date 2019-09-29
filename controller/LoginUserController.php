@@ -27,6 +27,9 @@ class LoginUserController {
     public function loginUser() {
         try {
             if ($this->view->userWantsToLogin()) {
+                if ($this->view->isLogged() && !$this->checkSession){
+                    unset($_SESSION[self::$sessionId]);
+                }
                 $user = $this->view->getLoginUser();   
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
@@ -38,6 +41,16 @@ class LoginUserController {
             $message = $e->getMessage();
             $this->view->setMessage($message);
         }
+    }
+
+    private function checkSession() {
+        if (!isset($_SERVER["HTTP_USER_AGENT"])) {
+            return FALSE;
+        }
+        if(!isset($_SESSION["userAgent"])) {
+            return FALSE;
+        }
+        return $_SERVER["HTTP_USER_AGENT"] === $SESSION["userAgent"];
     }
 
     public function getLoginUser() {
