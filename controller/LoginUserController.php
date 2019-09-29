@@ -36,12 +36,6 @@ class LoginUserController {
     }
 
     public function authUser() {
-        $uid = $this->view->getCookieNameValue(); 
-        if (!$this->auth->verifyUserAgent($uid)) {
-           $this->logoutUnAuth();
-            return;
-        }
-        // check if cookies are set and no session is in use.
         if($this->view->userWantsToAuthenticate()) {
             try {
                 $uid = $this->view->getCookieNameValue();
