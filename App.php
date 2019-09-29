@@ -33,7 +33,7 @@ class App {
     private function changeState() {
         $this->loginController->authUser();
         $this->regController->registerUser();
-        $this->loginController->loginUser();
+        $this->loginController->getLoginUser();
         $this->loginController->logoutUser();
     }
 

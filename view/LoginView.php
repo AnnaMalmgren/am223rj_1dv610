@@ -79,18 +79,6 @@ class LoginView {
 	public function setMessage($message) : string {
 		return $this->message = $message;
 	}
-
-	public function setWelcomeMessage() {
-		// user logged in with "keep me logged in
-		if (!$this->isLoggedIn() && $this->rememberMe()) {
-			$this->setMessage("Welcome and you will be remembered");
-		// user authenticated with cookies
-		} else if (!$this->isLoggedIn() && $this->userWantsToAuthenticate()) {
-			$this->setMessage("Welcome back with cookie");
-		} else if (!$this->isLoggedIn()) {
-			$this->setMessage("Welcome");
-		}
-	}
 	
 	public function setUserName($username) {
 		$this->username = $username;
@@ -125,7 +113,6 @@ class LoginView {
 	}
 
 
-
 	/**
 	* Generate HTML code on the output buffer for the logout button
 	* @param $message, String output message
@@ -139,6 +126,7 @@ class LoginView {
 			</form>
 		';
 	}
+
 	
 	/**
 	* Generate HTML code on the output buffer for the logout button

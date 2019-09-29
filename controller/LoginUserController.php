@@ -10,8 +10,12 @@ class LoginUserController {
     private $auth;
     private static $sessionId = 'username';
     private static $sessionAgent = 'user_agent';
+    private static $tempSessionID = 'temporarySession';
+    private static $msg = 'msg';
     private $bytesLength = 12;
     private $cookieExpiresIn;
+    private $loginUser; 
+    private $welcomeMsg;
 
     public function __construct(\View\LoginView $loginView) {
         $this->view = $loginView;
@@ -24,11 +28,11 @@ class LoginUserController {
         try {
             if ($this->view->userWantsToLogin()) {
                 $user = $this->view->getLoginUser();   
-                $this->view->setWelcomeMessage();
-                $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
-                $this->view->setUserName($user->getUsername());
+                $_SESSION[self::$tempSessionID] = $user->getUsername();
+                header('Location: ?', true, 303);
+                exit;
             } 
         } catch (\Exception $e) {
             $message = $e->getMessage();
@@ -36,19 +40,28 @@ class LoginUserController {
         }
     }
 
+    public function getLoginUser() {
+        $this->loginUser();
+        if (isset($_SESSION[self::$tempSessionID]))
+        {
+            $this->view->setMessage("Welcome");
+            $this->startNewSession($_SESSION[self::$tempSessionID]);
+        }
+    }
+
     public function authUser() {
         try {
             if ($this->view->userWantsToAuthenticate()) {
                 $uid = $this->view->getCookieNameValue();
-                if (isset($_SESSION['username'])) {
+                if (isset($_SESSION[self::$sessionId])) {
                     if (!$this->auth->verifyUserAgent($uid, $_SERVER['HTTP_USER_AGENT'])) {
                         setcookie($this->view->getCookieName(), "", time() - 3600);
                         setcookie($this->view->getCookiePassword(), "", time() - 3600);
                         unset($_SESSION[self::$sessionId]);
                     }
-                } else if (!isset($_SESSION['username'])) {
+                } else if (!isset($_SESSION[self::$sessionId])) {
                     $this->verifyCookies($uid);
-                    $this->view->setWelcomeMessage();
+                    $this->setWelcomeMsg();
                     $this->startNewSession($uid);
                 }
             }
@@ -56,6 +69,12 @@ class LoginUserController {
             $message = $e->getMessage();
             $this->view->setMessage($message);
         }
+    }
+
+    private function setWelcomeMsg() {
+        isset($_SESSION[self::$msg]) ? 
+            $this->view->setMessage($_SESSION[self::$msg]) : 
+            $this->view->setMessage("Welcome back with cookies");
     }
 
     public function logoutUser() {
@@ -88,6 +107,7 @@ class LoginUserController {
         // User has checked "Keep me logged" in and entered correct login information.
         if ($this->view->rememberMe() && $user) {
             $userAgent = $_SERVER['HTTP_USER_AGENT'];
+            $_SESSION[self::$msg] = "Welcome and you will be remembered";
         //generates cookies and saves auth info to DB.
             $randomPassword = bin2hex(random_bytes($this->bytesLength));
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
@@ -104,5 +124,7 @@ class LoginUserController {
     private function startNewSession($uid) {
         session_regenerate_id();
         $_SESSION[self::$sessionId] = $uid;
+        unset($_SESSION[self::$tempSessionID]);
+        unset($_SESSION[self::$msg]);
     }
 }
