@@ -26,6 +26,7 @@ class LoginUserController {
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
+                $this->setSessionUserInfo();
                 $this->view->setUserName($user->getUsername());
             } 
         } catch (\Exception $e) {
@@ -35,6 +36,10 @@ class LoginUserController {
     }
 
     public function authUser() {
+        if (!$this->validateSessionInfo()) {
+            return $this->logoutUser();
+        }
+
         // check if cookies are set and no session is in use.
         if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
@@ -84,6 +89,20 @@ class LoginUserController {
     private function createCookies($randomPwd, $uid) {
         setcookie($this->view->getCookieName(), $uid,  $this->cookieExpiresIn);
         setcookie($this->view->getCookiePassword(), $randomPwd,  $this->cookieExpiresIn);
+    }
+
+    private function setSessionUserInfo() {
+        $_SESSION['HTTP_USER_AGENT'] = md5($_SERVER['HTTP_USER_AGENT']);
+    }
+
+    private function validateSessionInfo() {
+        if (isset($_SESSION['HTTP_USER_AGENT'])) {
+            if ($_SESSION['HTTP_USER_AGENT'] != md5($_SERVER['HTTP_USER_AGENT'])) {
+                return FALSE;
+            } else {
+                return TRUE;
+            }
+        }
     }
 
     private function startNewSession($uid) {
