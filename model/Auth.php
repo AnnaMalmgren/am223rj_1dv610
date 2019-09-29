@@ -27,6 +27,8 @@
 
     public function verifyUserAgent($uid) : bool {
         $userData = $this->getAuthUserFromDB($uid);
+        echo $userData['user_agent'] . "<br>";
+        echo $_SERVER['HTTP_USER_AGENT'];
         return $userData['user_agent'] === $_SERVER['HTTP_USER_AGENT'];
     }
 
