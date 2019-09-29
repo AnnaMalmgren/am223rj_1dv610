@@ -23,7 +23,7 @@ class LoginUserController {
         try {
             if ($this->view->userWantsToLogin()) {
                 $user = $this->view->getLoginUser();
-                $this->setUserAgent();
+                $this->view->setWelcomeMessage();  
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
@@ -41,7 +41,7 @@ class LoginUserController {
             try {
                 $uid = $this->view->getCookieNameValue(); 
                 $this->verifyCookies($uid);
-                $this->startNewSession($uid);
+                $this->startAuthSession($uid);
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
@@ -56,7 +56,7 @@ class LoginUserController {
             setcookie($this->view->getCookieName(), "", time() - 3600);
             setcookie($this->view->getCookiePassword(), "", time() - 3600);
             unset($_SESSION[self::$sessionId]);
-            unset($_SESSION['user_agent']);
+            unset($_SESSION[self::$sessionAgent]);
             $this->view->setMessage("Bye bye!");
         }
     }
@@ -98,15 +98,17 @@ class LoginUserController {
         return ($_SESSION[self::$sessionAgent] === $_SERVER['HTTP_USER_AGENT']);
     }
 
-    private function setUserAgent() {
-        $_SESSION[self::$sessionAgent] = $_SERVER['HTTP_USER_AGENT'];
-    }
-
-    private function startNewSession($uid) {
+    private function startAuthSession($uid) {
         if ($this->sessionUserAgent()) {
             session_regenerate_id();
             $_SESSION[self::$sessionId] = $uid;
-            $this->view->setWelcomeMessage();   
+            $this->view->setWelcomeMessage();
         }
+    }
+
+    private function startNewSession($uid) {
+        session_regenerate_id();
+        $_SESSION[self::$sessionId] = $uid;
+        $_SESSION[self::$sessionAgent] = $_SERVER['HTTP_USER_AGENT'];
     }
 }
