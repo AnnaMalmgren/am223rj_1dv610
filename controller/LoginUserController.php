@@ -23,15 +23,12 @@ class LoginUserController {
     public function loginUser() {
         try {
             if ($this->view->userWantsToLogin()) {
-                $user = $this->view->getLoginUser();
-                //Redirect to keep form from resubmit.
-                header("Location: ?");    
+                $user = $this->view->getLoginUser();   
                 $this->view->setWelcomeMessage();
                 $this->startNewSession($user->getUsername());
                 // if "keep me logged in" is checked creates cookies and save auth info.
                 $this->checkRemberMe($user);
                 $this->view->setUserName($user->getUsername());
-                exit;
             } 
         } catch (\Exception $e) {
             $message = $e->getMessage();
