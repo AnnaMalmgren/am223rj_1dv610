@@ -11,8 +11,8 @@ class RegisterUser {
     private $minPwdLength = 6;
 
     public function __construct($username, $password, $passwordRepeat) {
-        //require(__DIR__ . '/../dbproduction.php');
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../dbproduction.php');
+        //require(__DIR__ . '/../dbsettings.php');
         $this->conn = $conn;
 
         if ($this->isUserValid($username, $password, $passwordRepeat)) {
