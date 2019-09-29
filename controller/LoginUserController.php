@@ -40,11 +40,16 @@ class LoginUserController {
         if($this->view->userWantsToAuthenticate() && !isset($_SESSION[self::$sessionId])) {
             try {
                 $uid = $this->view->getCookieNameValue(); 
-                if ($this->auth->verifyUserAgent($uid)) {
+
+                if (!$this->auth->verifyUserAgent($uid)) {
+                    setcookie($this->view->getCookieName(), "", time() - 3600);
+                    setcookie($this->view->getCookiePassword(), "", time() - 3600);
+                } else {
                     $this->verifyCookies($uid);
                     $this->view->setWelcomeMessage();
                     $this->startNewSession($uid);
                 }
+
             } catch (\Exception $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
@@ -59,7 +64,6 @@ class LoginUserController {
             setcookie($this->view->getCookieName(), "", time() - 3600);
             setcookie($this->view->getCookiePassword(), "", time() - 3600);
             unset($_SESSION[self::$sessionId]);
-            unset($_SESSION[self::$sessionAgent]);
             $this->view->setMessage("Bye bye!");
         }
     }
@@ -80,8 +84,9 @@ class LoginUserController {
         //generates cookies and saves auth info to DB.
             $randomPassword = bin2hex(random_bytes($this->bytesLength));
             $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
+            $userAgent = $_SERVER['HTTP_USER_AGENT'];
             $this->createCookies($randomPassword, $user->getUsername());
-            $this->auth->saveAuthToDB($user->getUsername(), $hashedPassword);
+            $this->auth->saveAuthToDB($user->getUsername(), $hashedPassword, $userAgent);
          }
     }
 

@@ -47,10 +47,9 @@
         return $userData;
     }
 
-    public function saveAuthToDB($uid, $pwd) {
+    public function saveAuthToDB($uid, $pwd, $userAgent) {
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
-        $userAgent = $_SERVER['HTTP_USER_AGENT'];
         
         if ($this->isAuthInDB($uid)) {
             //if user already exist in DB update auth info for user.
