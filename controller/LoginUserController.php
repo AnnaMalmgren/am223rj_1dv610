@@ -51,7 +51,6 @@ class LoginUserController {
         try {
             if (isset($_SESSION[self::$sessionId])){
                 if(!$this->checkSession()) {
-                    unset($_SESSION[self::$sessionId]);
                     return;
                 }
             }
