@@ -35,8 +35,7 @@ CREATE TABLE `auth_users` (
   `id` int(11) NOT NULL,
   `authUsername` varchar(255) NOT NULL,
   `passwordHash` longtext NOT NULL,
-  `expireDate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `user_agent` longtext NOT NULL
+  `expireDate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
