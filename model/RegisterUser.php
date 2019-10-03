@@ -2,18 +2,19 @@
 namespace Model;
 
 require_once('RegisterUserException.php');
+require_once('DbUserTable.php');
 
 class RegisterUser {
     private $uid;
     private $hashedPwd;
-    private $conn;
+    private $sto;
     private $minUidLength = 3;
     private $minPwdLength = 6;
 
+
+
     public function __construct($username, $password, $passwordRepeat) {
-        require(__DIR__ . '/../dbproduction.php');
-        //require(__DIR__ . '/../dbsettings.php');
-        $this->conn = $conn;
+        $this->storage = new DbUserTable();
 
         if ($this->isUserValid($username, $password, $passwordRepeat)) {
             $this->uid = $username;
@@ -36,43 +37,19 @@ class RegisterUser {
             throw new RegisterUserException('Password has too few characters, at least 6 characters.');
         } else if ($pwd !== $pwdRepeat) {
             throw new RegisterUserException('Passwords do not match.');
-        } else if ($this->getUserFromDB($uid)) {
+        } else if ($this->storage->fetchUser($uid)) {
             throw new RegisterUserException('User exists, pick another username.');
         } else {
             return TRUE;
         }
     }
+    
+    public function registerNewUser()
+    {
+        $this->storage->saveUser($this->uid, $this->hashedPwd);
+    }
 
     private function hashPassword($pwd) : string {
         return password_hash($pwd, PASSWORD_DEFAULT); 
      }
-
-    public function getUserFromDB($uid) {
-        $sql = "SELECT * FROM users WHERE BINARY username=?";
-
-        $stmt = mysqli_stmt_init($this->conn);
-
-        if (!mysqli_stmt_prepare($stmt, $sql)) {
-            throw new \Exception('Something went wrong in getUser.');
-            exit();
-        } 
-        
-        mysqli_stmt_bind_param($stmt, 's', $uid);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $userData = mysqli_fetch_assoc($result);
-        return $userData;
-    }
-
-    public function saveUserToDB() {
-         $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
-         $stmt = mysqli_stmt_init($this->conn);
- 
-         if (!mysqli_stmt_prepare($stmt, $sql)) {
-             return "Something went wrong (sql error)";
-         } else {
-             mysqli_stmt_bind_param($stmt, "ss", $this->uid, $this->hashedPwd);
-             mysqli_stmt_execute($stmt);
-         }   
-    }
 }

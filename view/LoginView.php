@@ -1,7 +1,7 @@
 <?php
 namespace View;
 
-require_once(__DIR__ . '/../model/LoginUser.php');
+require_once(__DIR__ . '/../model/UserStorage.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -23,17 +23,12 @@ class LoginView {
 	 * @return  void BUT writes to standard output and cookies!
 	 */
 	public function response() {
-		$message = $this->message;
-
-		$response;
 
         if ($this->isLoggedIn()) {
-			$response = $this->generateLogoutButtonHTML($message);
+			return $this->generateLogoutButtonHTML($this->message);
 		} else {
-			$response = $this->generateLoginFormHTML($message);
+			return $this->generateLoginFormHTML($this->message);
 		}
-		
-		return $response;
 	}
 
 	public function userWantsToAuthenticate() : bool {
@@ -47,11 +42,9 @@ class LoginView {
 	public function getRequestPwd() : string {
 		return trim($_POST[self::$password]);
 	}
-	
+
 	public function isLoggedIn() {
-		if (isset($_SESSION['username'])) {
-			return TRUE;
-		} 
+		return \Model\UserStorage::isUserLoggedIn();
 	}
 
 	/**
@@ -71,8 +64,14 @@ class LoginView {
 	}
 	
 	
-	public function getLoginUser() : \Model\LoginUser {
-		return new \Model\LoginUser($this->getRequestName(), $this->getRequestPwd());
+	public function getUserCredentials() {
+		if (empty($this->getRequestName())) {
+			throw new \Model\LoginUserException('Username is missing');
+		} else if (empty($this->getRequestPwd())) {
+			throw new \Model\LoginUserException('Password is missing');
+		}
+
+		return new \Model\UserStorage($this->getRequestName(), $this->getRequestPwd());
 	}
 	
 
@@ -81,11 +80,11 @@ class LoginView {
 	}
 
 	public function setWelcomeMessage() {
-		if (!$this->isLoggedIn() && $this->rememberMe()) {
+		if ($this->rememberMe() && !$this->isLoggedIn()) {
 			$this->setMessage("Welcome and you will be remembered");
-		} else if (!$this->isLoggedIn() && $this->userWantsToAuthenticate()) {
+		} else if ($this->userWantsToAuthenticate() && !$this->isLoggedIn()) {
 			$this->setMessage("Welcome back with cookie");
-		} else if (!$this->isLoggedIn()) {
+		} else if (!$this->isLoggedIn()){
 			$this->setMessage("Welcome");
 		}
 	}
@@ -102,12 +101,14 @@ class LoginView {
 		}
 	}
 
-	public function getCookieName() : string {
-		return self::$cookieName;
+	public function setCookies($randomPwd, $expiresIn) {
+		setcookie(self::$cookieName, $this->getRequestName(),  $expiresIn);
+		setcookie(self::$cookiePassword, $randomPwd,  $expiresIn);
 	}
 
-	public function getCookiePassword() : string {
-		return self::$cookiePassword;
+	public function removeCookies() {
+		setcookie(self::$cookieName, "", time() - 3600);
+		setcookie(self::$cookiePassword, "", time() - 3600);
 	}
 
 	public function getCookieNameValue() : string {
@@ -121,7 +122,6 @@ class LoginView {
 			return $_COOKIE[self::$cookiePassword];
 		}
 	}
-
 
 	/**
 	* Generate HTML code on the output buffer for the logout button

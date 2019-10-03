@@ -32,7 +32,7 @@ class RegUserController {
     }
 
     private function saveRegisteredUser($user) {
-        $user->saveUserToDB();
+        $user->registerNewUser();
         $this->loginView->setMessage(self::$successMsg);
         $this->loginView->setUsername($user->getUsername());
         $this->userIsRegistered = TRUE;
