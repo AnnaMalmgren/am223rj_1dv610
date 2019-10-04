@@ -1,12 +1,12 @@
 <?php 
-
 namespace Controller;
+
+require_once(__DIR__ . '/../model/RegisterUser.php');
 
 class RegUserController {
     private $userIsRegistered = FALSE;
     private $view;
     private $loginView;
-    private $conn;
     private static $successMsg = "Registered new user.";
 
     public function __construct(\View\RegisterView $registerView, \View\LoginView $loginView) {
@@ -18,23 +18,25 @@ class RegUserController {
         return $this->userIsRegistered;
     }
     
-    public function registerUser () {
+    public function doRegisterUser () {
         if($this->view->userWantsToRegister()) {
-            try {
-                // creates user, throws exception if register form is invalid.
-                $user = $this->view->getUser();
-                $this->saveRegisteredUser($user);
-            } catch (\Exception $e) {
-                $message = $e->getMessage();
-                $this->view->setMessage($message);
-            }
+          $this->registerUser();
         }
     }
 
-    private function saveRegisteredUser($user) {
-        $user->registerNewUser();
+    private function registerUser() {
+        try {
+            $userCredentials = $this->view->getUser();
+            $registerUser = new \Model\RegisterUser($userCredentials);
+            $this->setSuccesScenario();
+        } catch (\Model\RegisterUserException $e) {
+            $message = $e->getMessage();
+            $this->view->setMessage($message);
+        }
+    }
+
+    private function setSuccesScenario() {
         $this->loginView->setMessage(self::$successMsg);
-        $this->loginView->setUsername($user->getUsername());
-        $this->userIsRegistered = TRUE;
+         $this->userIsRegistered = TRUE;   
     }
 }

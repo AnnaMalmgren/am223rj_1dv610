@@ -2,14 +2,14 @@
 
 namespace Model;
 
-//require(__DIR__ . '/../dbproduction.php');
+//require(__DIR__ . '/../../dbproduction.php');
 
  class DBconn {
      private $conn;
 
      public function __construct()
      {
-        require(__DIR__ . '/../dbsettings.php');
+        require(__DIR__ . '/../../dbsettings.php');
         $this->conn = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName);
 
         if(!$this->conn) {

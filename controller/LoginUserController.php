@@ -2,7 +2,8 @@
 
 namespace Controller;
 
-require_once(__DIR__ . '/../model/DbAuthTable.php');
+require_once(__DIR__ . '/../model/UserStorage.php');
+require_once(__DIR__ . '/../model/DAL/DbAuthTable.php');
 
 class LoginUserController {
 
@@ -21,10 +22,11 @@ class LoginUserController {
         try {
             if ($this->view->userWantsToLogin()) {
 
-                $user = $this->view->getUserCredentials();
-                $this->checkRemberMe($user);
+                $userCredentials = $this->view->getUserCredentials();
+                $loggedInUser = new \Model\UserStorage($userCredentials);
+                $this->checkRemberMe($userCredentials);
                 $this->view->setWelcomeMessage();
-                $user->startNewSession();
+                $storage->startNewSession();
             } 
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -35,8 +37,8 @@ class LoginUserController {
     public function authUser() {
         try {
             if ($this->view->userWantsToAuthenticate() && !$this->view->isLoggedIn()) {
-                $uid = $this->view->getCookieNameValue();
-                $this->verifyCookies($uid);
+                $cookieName = $this->view->getCookieNameValue();
+                $this->verifyCookies($cookieName);
                 $this->view->setWelcomeMessage();
                 //$this->user->startNewSession($uid);
             }
@@ -47,10 +49,9 @@ class LoginUserController {
     }
 
     public function logoutUser() {
-        //user can only logout if is logged in-
         if ($this->view->userWantsToLogout() && $this->view->isLoggedIn()) {
-            // removes cookies and session variable.
             $this->view->removeCookies();
+            //TODO Flytta till userstorage bort med string beroende
             unset($_SESSION['SessionName']);
             $this->view->setMessage("Bye bye!");
         }

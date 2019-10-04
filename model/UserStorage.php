@@ -2,40 +2,31 @@
 
 namespace Model;
 
-require_once('LoginUserException.php');
-require_once('DbUserTable.php');
+require_once('Exceptions/LoginUserException.php');
+require_once('DAL/DbUserTable.php');
 
 class UserStorage {
     private static $sessionName = 'SessionName';
     private static $userAgent = 'UserAgent';
-    private $uid;
+    private $loggedInUser;
     private $storage;
 
-    public function __construct($uid, $pwd) {
+    public function __construct(User $user) {
         $this->storage = new \Model\DbUserTable();
-        $this->setUsername($uid);
-        $this->setPassword($uid, $pwd);
+        $this->setUser($user);
     }
 
-    public function getUsername() {
-        return $this->uid;
-    }
-
-    public function setUsername($uid) {
-        if (!$this->storage->fetchUser($uid)) {
-            throw new LoginUserException('Wrong name or password');
+    private function setUser($user) {
+        if (!$this->storage->fetchUser($user)) {
+            throw new WrongCredentialsException();
         }
 
-        $this->uid = $uid;
-    }
-
-    public function setPassword($uid, $pwd) {
-       if (!$this->storage->verifyPassword($uid, $pwd)) {
-            throw new LoginUserException('Wrong name or password');
+        if (!$this->storage->verifyPassword($user)) {
+            throw new WrongCredentialsException();
         }
-        $this->pwd = $pwd;
-    }
 
+        $this->loggedInUser = $user;
+    }
     
     private function checkSession() {
         if (!isset($_SERVER["HTTP_USER_AGENT"])) {
@@ -50,7 +41,7 @@ class UserStorage {
    
     public function startNewSession() {
         session_regenerate_id();
-        $_SESSION[self::$sessionName] = $this->uid;
+        $_SESSION[self::$sessionName] = $this->loggedInUser.getUsername();
         $_SESSION[self::$userAgent] = $_SERVER["HTTP_USER_AGENT"];
     }
 

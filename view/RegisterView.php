@@ -2,6 +2,7 @@
 namespace View;
 
 require_once(__DIR__ . '/../model/RegisterUser.php');
+require_once(__DIR__ . '/../model/User.php');
 
 class RegisterView extends LoginView {
 	private static $name = 'RegisterView::UserName';
@@ -51,12 +52,21 @@ class RegisterView extends LoginView {
 		 }
 	}
 
-	public function getUser() : \Model\RegisterUser {
-		$uid = $this->getRequestName();
-		$pwd = $this->getRequestPwd();
-		$pwdRepeat = $this->getRequestPwdRepeat();
-		return new \Model\RegisterUser($uid, $pwd, $pwdRepeat);
+	public function getUser() : \Model\User {
+		$username = $this->getRequestName();
+		$password = $this->getRequestPwd();
+
+		if (empty($username) && empty($password)) {
+			throw new \Model\RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.');
+		}
+
+		if ($password !== $this->getRequestPwdRepeat()) {
+            throw new \Model\PasswordsDontMatchException();
+        }
+		
+		return new \Model\User($username, $password);
 	}
+
 	
 	public function setMessage($message) : string {
 		return $this->message = $message;

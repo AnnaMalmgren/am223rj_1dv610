@@ -2,6 +2,7 @@
 namespace View;
 
 require_once(__DIR__ . '/../model/UserStorage.php');
+require_once(__DIR__ . '/../model/User.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -71,7 +72,7 @@ class LoginView {
 			throw new \Model\LoginUserException('Password is missing');
 		}
 
-		return new \Model\UserStorage($this->getRequestName(), $this->getRequestPwd());
+		return new \Model\User($this->getRequestName(), $this->getRequestPwd());
 	}
 	
 

@@ -1,55 +1,24 @@
 <?php
 namespace Model;
 
-require_once('RegisterUserException.php');
-require_once('DbUserTable.php');
+require_once('Exceptions/RegisterUserException.php');
+require_once('DAL/DbUserTable.php');
 
 class RegisterUser {
-    private $uid;
-    private $hashedPwd;
-    private $sto;
-    private $minUidLength = 3;
-    private $minPwdLength = 6;
+    private $storage;
+    private $registeredUser;
 
-
-
-    public function __construct($username, $password, $passwordRepeat) {
+    public function __construct(User $user) {
         $this->storage = new DbUserTable();
+        $this->setRegisteredUser($user);
+    }
 
-        if ($this->isUserValid($username, $password, $passwordRepeat)) {
-            $this->uid = $username;
-            $this->hashedPwd = $this->hashPassword($password);
+    private function setRegisteredUser($user) {
+        if ($this->storage->fetchUser($user)) {
+            throw new UsernameExistsException();
         }
-    }
 
-    public function getUsername() {
-        return $this->uid;
+        $this->registeredUser = $user;
+        $this->storage->saveUser($this->registeredUser);
     }
-
-    private function isUserValid($uid, $pwd, $pwdRepeat) : bool {
-        if (empty($uid) && empty($pwd)) {
-            throw new RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.'); 
-        } else if (strlen($uid) < $this->minUidLength) {
-            throw new RegisterUserException('Username has too few characters, at least 3 characters.');
-        } else if ($uid !== htmlentities($uid)) {
-            throw new RegisterUserException('Username contains invalid characters.');
-        } else if (strlen($pwd) < $this->minPwdLength) {
-            throw new RegisterUserException('Password has too few characters, at least 6 characters.');
-        } else if ($pwd !== $pwdRepeat) {
-            throw new RegisterUserException('Passwords do not match.');
-        } else if ($this->storage->fetchUser($uid)) {
-            throw new RegisterUserException('User exists, pick another username.');
-        } else {
-            return TRUE;
-        }
-    }
-    
-    public function registerNewUser()
-    {
-        $this->storage->saveUser($this->uid, $this->hashedPwd);
-    }
-
-    private function hashPassword($pwd) : string {
-        return password_hash($pwd, PASSWORD_DEFAULT); 
-     }
 }

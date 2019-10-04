@@ -7,22 +7,22 @@ require_once('DBconn.php');
  class DbUserTable extends DBconn {
      private static $colPwd = 'password';
 
-    public function fetchUser($uid) {
+    public function fetchUser(User $user) {
         $sql = "SELECT * FROM users WHERE BINARY username=?";
         $types = "s";
-        $param = [$uid];
+        $param = [$user->getUsername()];
         return $this->getFromDB($sql, $types, $param);
     }
 
-    public function saveUser($uid, $hashedPwd) {
+    public function saveUser(User $user) {
         $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
         $types = "ss";
-        $params = [$uid, $hashedPwd];
+        $params = [$user->getUsername(), $user->getHashedPassword()];
         $this->saveToDB($sql, $types, $params);
     }
 
-    public function verifyPassword ($uid, $pwd) : bool {
-        $userData = $this->fetchUser($uid);
-        return password_verify($pwd, $userData[self::$colPwd]);       
+    public function verifyPassword (User $user) : bool {
+        $userData = $this->fetchUser($user);
+        return password_verify($user->getPassword(), $userData[self::$colPwd]);       
     }
  }
