@@ -5,7 +5,7 @@ namespace Model;
 require_once('Exceptions/LoginUserException.php');
 require_once('DAL/DbUserTable.php');
 
-class UserStorage {
+class LoginUser {
     private static $sessionName = 'SessionName';
     private static $userAgent = 'UserAgent';
     private $loggedInUser;
@@ -39,9 +39,9 @@ class UserStorage {
     }
 
    
-    public function startNewSession() {
+    public function startNewSession($user) {
         session_regenerate_id();
-        $_SESSION[self::$sessionName] = $this->loggedInUser.getUsername();
+        $_SESSION[self::$sessionName] = $user->getUsername();
         $_SESSION[self::$userAgent] = $_SERVER["HTTP_USER_AGENT"];
     }
 

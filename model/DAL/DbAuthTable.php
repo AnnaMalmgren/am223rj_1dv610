@@ -5,54 +5,38 @@ namespace Model;
 require_once('DBconn.php');
 
  class DbAuthTable extends DBconn {
-
     private static $colPwd = 'passwordHash';
 
-    private static $colExpireDate = 'expireDate';
-
-    public function getAuthUser($uid) {
+    public function getAuthUser(User $user) {
         $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
         $types = "s";
-        $param = [$uid];
+        $param = [$user->getUsername()];
         return $this->getFromDB($sql, $types, $param);
     }
 
-    public function saveAuthUser($uid, $pwd) {
+    public function saveAuthUser($user) {
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
         
-        if ($this->getAuthUser($uid)) {
+        if ($this->getAuthUser($user)) {
             //if user already exist in DB update auth info for user.
-            return $this->updateAuthUser($uid, $pwd);
+            return $this->updateAuthUser($user);
         }
 
         $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
         $types = "sss";
-        $params = [$uid, $pwd, $expireDate];
+        $params = [$user->getUsername(), $user->getHashedTempPassword(), $expireDate];
         $this->saveToDB($sql, $types, $params);
     }
 
-    private function updateAuthUser($uid, $pwd) {
+    private function updateAuthUser($user) {
         $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
         $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
         $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ? WHERE BINARY authUsername = ?";
         $types = "sss";
-        $params = [$expireDate, $pwd, $uid];
+        $params = [$expireDate, $user->getHashedTempPassword(), $user->getUsername()];
         $this->updateDB($sql, $types, $params); 
     }
-
-    public function verifyPwdToken($uid, $pwd) : bool {
-        $userData = $this->getAuthUser($uid);
-        return password_verify($pwd, $userData[self::$colPwd]);
-    }
-
-    public function verifyExpireDate($uid) : bool {
-        $userData = $this->getAuthUser($uid);
-        $currentDate = date("Y-m-d H:i:s", time());
-        $expireDate = $userData[self::$colExpireDate];
-        // check that cookie hasn't expired.
-        return $expireDate > $currentDate;
-    }  
 
  }

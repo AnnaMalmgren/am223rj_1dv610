@@ -1,7 +1,7 @@
 <?php
 namespace View;
 
-require_once(__DIR__ . '/../model/UserStorage.php');
+require_once(__DIR__ . '/../model/LoginUser.php');
 require_once(__DIR__ . '/../model/User.php');
 
 class LoginView {
@@ -45,7 +45,7 @@ class LoginView {
 	}
 
 	public function isLoggedIn() {
-		return \Model\UserStorage::isUserLoggedIn();
+		return \Model\LoginUser::isUserLoggedIn();
 	}
 
 	/**
@@ -65,17 +65,20 @@ class LoginView {
 	}
 	
 	
-	public function getUserCredentials() {
+	public function getUserCredentials() : \Model\User {
 		if (empty($this->getRequestName())) {
 			throw new \Model\LoginUserException('Username is missing');
 		} else if (empty($this->getRequestPwd())) {
 			throw new \Model\LoginUserException('Password is missing');
 		}
-
 		return new \Model\User($this->getRequestName(), $this->getRequestPwd());
 	}
-	
 
+	public function getAuthCredentials() : \Model\User {
+		return new \Model\User($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+	}
+
+	
 	public function setMessage($message) : string {
 		return $this->message = $message;
 	}
@@ -102,26 +105,14 @@ class LoginView {
 		}
 	}
 
-	public function setCookies($randomPwd, $expiresIn) {
+	public function setCookies(User $user, $expiresIn) {
 		setcookie(self::$cookieName, $this->getRequestName(),  $expiresIn);
-		setcookie(self::$cookiePassword, $randomPwd,  $expiresIn);
+		setcookie(self::$cookiePassword, $user->tempPassword,  $expiresIn);
 	}
 
 	public function removeCookies() {
 		setcookie(self::$cookieName, "", time() - 3600);
 		setcookie(self::$cookiePassword, "", time() - 3600);
-	}
-
-	public function getCookieNameValue() : string {
-		if (isset($_COOKIE[self::$cookieName])) {
-			return $_COOKIE[self::$cookieName];
-		}
-	}
-
-	public function getCookiePasswordValue() : string {
-		if (isset($_COOKIE[self::$cookiePassword])) {
-			return $_COOKIE[self::$cookiePassword];
-		}
 	}
 
 	/**

@@ -2,7 +2,8 @@
 
 namespace Controller;
 
-require_once(__DIR__ . '/../model/UserStorage.php');
+require_once(__DIR__ . '/../model/LoginUser.php');
+require_once(__DIR__ . '/../model/AuthUser.php');
 require_once(__DIR__ . '/../model/DAL/DbAuthTable.php');
 
 class LoginUserController {
@@ -23,10 +24,10 @@ class LoginUserController {
             if ($this->view->userWantsToLogin()) {
 
                 $userCredentials = $this->view->getUserCredentials();
-                $loggedInUser = new \Model\UserStorage($userCredentials);
-                $this->checkRemberMe($userCredentials);
+                $loggedInUser = new \Model\LoginUser($userCredentials);
+                $this->keepMeLoggedIn($userCredentials);
                 $this->view->setWelcomeMessage();
-                $storage->startNewSession();
+                $loggedInUser->startNewSession($userCredentials);
             } 
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -37,10 +38,10 @@ class LoginUserController {
     public function authUser() {
         try {
             if ($this->view->userWantsToAuthenticate() && !$this->view->isLoggedIn()) {
-                $cookieName = $this->view->getCookieNameValue();
-                $this->verifyCookies($cookieName);
+                $authCredentials = $this->view->getAuthCredentials();
+                $authenticatedUser = new \Model\AuthUser($authCredentials);
                 $this->view->setWelcomeMessage();
-                //$this->user->startNewSession($uid);
+                $authenticatedUser->startNewSession($authCredentials);
             }
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -57,24 +58,12 @@ class LoginUserController {
         }
     }
 
-    private function verifyCookies($uid) {
-        $pwd = $this->view->getCookiePasswordValue();
-        // Check if cookie expiredate and pwd is valid.
-        $expireDateCheck = $this->auth->verifyExpireDate($uid);
-        $pwdTokenCheck = $this->auth->verifyPwdToken($uid, $pwd);
-
-        if (!$expireDateCheck || !$pwdTokenCheck ) {
-            throw new \Model\LoginUserException('Wrong information in cookies');
-        }
-    }
-    
-    private function checkRemberMe($user) {
+    private function keepMeLoggedIn($user) {
         // User has checked "Keep me logged" in and entered correct login information.
         if ($this->view->rememberMe() && $user) {
-            $randomPassword = bin2hex(random_bytes($this->bytesLength));
-            $hashedPassword = password_hash($randomPassword, PASSWORD_DEFAULT);
-            $this->view->setCookies($randomPassword, $this->cookieExpiresIn);
-            $this->auth->saveAuthUser($user->getUsername(), $hashedPassword);
+            $user->setTempPassword();
+            $this->view->setCookies($user, $this->cookieExpiresIn);
+            $this->auth->saveAuthUser($user);
          }
     }
 
