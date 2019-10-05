@@ -21,26 +21,30 @@ class AuthUser extends LoginUser {
        $this->authenticatedUser = $user;
     }
 
-    private function verifyPwdToken($user) : bool {
+    private function verifyPwdToken(User $user) : bool {
         $userData = $this->storage->getAuthUser($user);  
-        return password_verify($user->tempPassword, $userData[self::$colPwd]);
+        return password_verify($user->getPassword(), $userData[self::$colPwd]);
     }
 
-    private function verifyExpireDate($user) : bool {
+    private function verifyExpireDate(User $user) : bool {
         $userData = $this->storage->getAuthUser($user);
         $currentDate = date("Y-m-d H:i:s", time());
         $expireDate = $userData[self::$colExpireDate];
         return $expireDate > $currentDate;
     }  
 
-    private function verifyCookies($user) {
+    private function verifyCookies(User $user) {
         // Check if cookie expiredate and pwd is valid.
         $expireDateCheck = $this->verifyExpireDate($user);
         $pwdTokenCheck = $this->verifyPwdToken($user);
 
         if (!$expireDateCheck || !$pwdTokenCheck ) {
-            throw new \Model\LoginUserException('Wrong information in cookies');
+            throw new \Model\WrongCookieInfoException();
         }
+    }
+
+    public function saveAuthCredentials($user) {
+        $this->storage->saveAuthUser($user);
     }
     
    

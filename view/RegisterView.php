@@ -1,7 +1,6 @@
 <?php
 namespace View;
 
-require_once(__DIR__ . '/../model/RegisterUser.php');
 require_once(__DIR__ . '/../model/User.php');
 
 class RegisterView extends LoginView {

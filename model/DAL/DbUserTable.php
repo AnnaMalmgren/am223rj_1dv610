@@ -17,12 +17,16 @@ require_once('DBconn.php');
     public function saveUser(User $user) {
         $sql = "INSERT INTO users (username, password) VALUES(?, ?)";
         $types = "ss";
-        $params = [$user->getUsername(), $user->getHashedPassword()];
+        $params = [$user->getUsername(), $this->hashedPassword($user)];
         $this->saveToDB($sql, $types, $params);
     }
 
     public function verifyPassword (User $user) : bool {
         $userData = $this->fetchUser($user);
         return password_verify($user->getPassword(), $userData[self::$colPwd]);       
+    }
+
+    private function hashPassword($user) {
+        return password_hash($user->getPassword(), PASSWORD_DEFAULT); 
     }
  }

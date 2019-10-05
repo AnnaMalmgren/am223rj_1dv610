@@ -39,9 +39,9 @@ class LoginUser {
     }
 
    
-    public function startNewSession($user) {
+    public function startNewSession(User  $user) {
         session_regenerate_id();
-        $_SESSION[self::$sessionName] = $user->getUsername();
+        $_SESSION[self::$sessionName] = $user;
         $_SESSION[self::$userAgent] = $_SERVER["HTTP_USER_AGENT"];
     }
 

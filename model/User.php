@@ -3,15 +3,19 @@
 namespace Model; 
 
 require_once('Exceptions/RegisterUserException.php');
+require_once('DAL/DbUserTable.php');
 
 class User {
     private $username;
     private $password;
+    public $tempPassword;
+    private $storage;
     private $minUsernameLength = 3;
     private $minPassswordLength = 6;
-    public $tempPassword;
+    private $bytesLength = 12;
 
     public function __construct($username, $password) {
+            $this->storage = new DbUserTable();
             $this->setUsername($username);
             $this->setPassword($password);
     }
@@ -24,6 +28,7 @@ class User {
         if (strlen($username) < $this->minUsernameLength) {
             throw new ToShortUserNameException();
         }
+        
         if ($username !== htmlentities($username)) {
             throw new InvalidCharactersException();
         }
@@ -43,17 +48,18 @@ class User {
         $this->password = $password;
     }
 
-    public function getHashedPassword() {
-        return password_hash($this->password, PASSWORD_DEFAULT); 
-        return $this->hashPassword();
+    public function getTempPassword() {
+        return $this->tempPassword;
     }
-
-    public function getHashedTempPassword() {
-        return password_hash($this->tempPassword, PASSWORD_DEFAULT); 
-    }
-
 
      public function setTempPassword() {
         $this->tempPassword = bin2hex(random_bytes($this->bytesLength));
      }
+
+     public function saveRegisteredUser($user) {
+        if ($this->storage->fetchUser($user)) {
+            throw new UsernameExistsException();
+        }
+        $this->storage->saveUser($user);
+    }
 }

@@ -15,9 +15,7 @@ require_once('DBconn.php');
     }
 
     public function saveAuthUser($user) {
-        $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
-        $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
-        
+  
         if ($this->getAuthUser($user)) {
             //if user already exist in DB update auth info for user.
             return $this->updateAuthUser($user);
@@ -25,18 +23,26 @@ require_once('DBconn.php');
 
         $sql = "INSERT INTO auth_users (authUsername, passwordHash, expireDate) VALUES(?, ?, ?)";
         $types = "sss";
-        $params = [$user->getUsername(), $user->getHashedTempPassword(), $expireDate];
+        $params = [$user->getUsername(), $this->hashPassword($user), $this->setExpireDate()];
         $this->saveToDB($sql, $types, $params);
     }
 
-    private function updateAuthUser($user) {
-        $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
-        $expireDate = date("Y-m-d H:i:s", $cookieExpiresIn);
 
+    private function updateAuthUser($user) {
         $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ? WHERE BINARY authUsername = ?";
         $types = "sss";
-        $params = [$expireDate, $user->getHashedTempPassword(), $user->getUsername()];
+        $params = [$this->setExpireDate(), $this->hashPassword($user), $user->getUsername()];
         $this->updateDB($sql, $types, $params); 
+    }
+
+    private function hashPassword($user) {
+        $pwd = $user->getTempPassword();
+        return password_hash($pwd, PASSWORD_DEFAULT);
+    }
+
+    private function setExpireDate() {
+        $cookieExpiresIn = time() + (7 * 24 * 60 * 60);
+        return date("Y-m-d H:i:s", $cookieExpiresIn);
     }
 
  }

@@ -93,7 +93,7 @@ class LoginView {
 		}
 	}
 	
-	public function setUserName($username) {
+	public function setUsername($username) {
 		$this->username = $username;
 	}
 
@@ -105,7 +105,7 @@ class LoginView {
 		}
 	}
 
-	public function setCookies(User $user, $expiresIn) {
+	public function setCookies(\Model\User $user, $expiresIn) {
 		setcookie(self::$cookieName, $this->getRequestName(),  $expiresIn);
 		setcookie(self::$cookiePassword, $user->tempPassword,  $expiresIn);
 	}

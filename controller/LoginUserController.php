@@ -3,7 +3,7 @@
 namespace Controller;
 
 require_once(__DIR__ . '/../model/LoginUser.php');
-require_once(__DIR__ . '/../model/AuthUser.php');
+require_once(__DIR__ . '/../model/Authentication.php');
 require_once(__DIR__ . '/../model/DAL/DbAuthTable.php');
 
 class LoginUserController {
@@ -42,6 +42,7 @@ class LoginUserController {
                 $authenticatedUser = new \Model\AuthUser($authCredentials);
                 $this->view->setWelcomeMessage();
                 $authenticatedUser->startNewSession($authCredentials);
+
             }
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
