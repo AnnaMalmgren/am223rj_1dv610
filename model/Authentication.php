@@ -2,34 +2,32 @@
 
 namespace Model;
 
-require_once('LoginUser.php');
 require_once('DAL/DbAuthTable.php');
 
-class AuthUser extends LoginUser {
-    private $authenticatedUser;
+class Authentication {
     private $storage;
     private static $colPwd = 'passwordHash';
     private static $colExpireDate = 'expireDate';
 
-    public function __construct(User $user) {
-        $this->storage = new \Model\DbAuthTable();
-        $this->setUser($user);
+
+    public function __construct() {
+        $this->storage = new \Model\DbAuthTable(); 
     }
 
-    private function setUser(User $user) {
+    public function validateCredentials(User $user) {
        $this->verifyCookies($user);
-       $this->authenticatedUser = $user;
+       session_regenerate_id();
     }
 
     private function verifyPwdToken(User $user) : bool {
-        $userData = $this->storage->getAuthUser($user);  
-        return password_verify($user->getPassword(), $userData[self::$colPwd]);
+        $this->userData = $this->storage->getAuthUser($user); 
+        return password_verify($user->getPassword(), $this->userData[self::$colPwd]);
     }
 
-    private function verifyExpireDate(User $user) : bool {
-        $userData = $this->storage->getAuthUser($user);
+    private function verifyExpireDate($user) : bool {
+        $this->userData = $this->storage->getAuthUser($user); 
         $currentDate = date("Y-m-d H:i:s", time());
-        $expireDate = $userData[self::$colExpireDate];
+        $expireDate = $this->userData[self::$colExpireDate];
         return $expireDate > $currentDate;
     }  
 
@@ -46,6 +44,5 @@ class AuthUser extends LoginUser {
     public function saveAuthCredentials($user) {
         $this->storage->saveAuthUser($user);
     }
-    
-   
+
 }

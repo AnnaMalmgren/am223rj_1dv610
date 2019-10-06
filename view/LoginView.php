@@ -1,7 +1,7 @@
 <?php
 namespace View;
 
-require_once(__DIR__ . '/../model/LoginUser.php');
+require_once(__DIR__ . '/../model/UserStorage.php');
 require_once(__DIR__ . '/../model/User.php');
 
 class LoginView {
@@ -45,7 +45,7 @@ class LoginView {
 	}
 
 	public function isLoggedIn() {
-		return \Model\LoginUser::isUserLoggedIn();
+		return \Model\UserStorage::isUserLoggedIn();
 	}
 
 	/**
@@ -97,7 +97,7 @@ class LoginView {
 		$this->username = $username;
 	}
 
-	private function getUserName() : string {
+	private function getUsername() : string {
 		if ($this->userWantsToLogin()) {
 			return $this->getRequestName();
 		} else {
@@ -143,7 +143,7 @@ class LoginView {
 					<p id="' . self::$messageId . '">' . $message . '</p>
 					
 					<label for="' . self::$name . '">Username :</label>
-					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUserName() . '" />
+					<input type="text" id="' . self::$name . '" name="' . self::$name . '" value="' . $this->getUsername() . '" />
 
 					<label for="' . self::$password . '">Password :</label>
 					<input type="password" id="' . self::$password . '" name="' . self::$password . '" />

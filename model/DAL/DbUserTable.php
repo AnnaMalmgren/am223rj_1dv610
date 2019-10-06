@@ -26,7 +26,7 @@ require_once('DBconn.php');
         return password_verify($user->getPassword(), $userData[self::$colPwd]);       
     }
 
-    private function hashPassword($user) {
+    private function hashedPassword($user) {
         return password_hash($user->getPassword(), PASSWORD_DEFAULT); 
     }
  }

@@ -2,32 +2,30 @@
 
 namespace Controller;
 
-require_once(__DIR__ . '/../model/LoginUser.php');
+require_once(__DIR__ . '/../model/UserStorage.php');
 require_once(__DIR__ . '/../model/Authentication.php');
-require_once(__DIR__ . '/../model/DAL/DbAuthTable.php');
 
 class LoginUserController {
 
     private $view;
     private $auth;
+    private $userStorage;
     private $bytesLength = 12;
     private $cookieExpiresIn; 
 
     public function __construct(\View\LoginView $loginView) {
         $this->view = $loginView;
-        $this->auth = new \Model\DbAuthTable();
+        $this->auth = new \Model\Authentication();
+        $this->userStorage = new \Model\UserStorage();
         $this->cookieExpiresIn = time() + (7 * 24 * 60 * 60);
     }
     
     public function loginUser() {
         try {
             if ($this->view->userWantsToLogin()) {
-
                 $userCredentials = $this->view->getUserCredentials();
-                $loggedInUser = new \Model\LoginUser($userCredentials);
+                $this->validateCredentials($this->userStorage, $userCredentials);
                 $this->keepMeLoggedIn($userCredentials);
-                $this->view->setWelcomeMessage();
-                $loggedInUser->startNewSession($userCredentials);
             } 
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -39,10 +37,7 @@ class LoginUserController {
         try {
             if ($this->view->userWantsToAuthenticate() && !$this->view->isLoggedIn()) {
                 $authCredentials = $this->view->getAuthCredentials();
-                $authenticatedUser = new \Model\AuthUser($authCredentials);
-                $this->view->setWelcomeMessage();
-                $authenticatedUser->startNewSession($authCredentials);
-
+                $this->validateCredentials($this->auth, $authCredentials);
             }
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -50,11 +45,16 @@ class LoginUserController {
         }
     }
 
+    private function validateCredentials($validator, \Model\User $user) {
+        $validator->validateCredentials($user);
+        $this->view->setWelcomeMessage();
+        $this->userStorage->startNewSession($user);
+    }
+
     public function logoutUser() {
         if ($this->view->userWantsToLogout() && $this->view->isLoggedIn()) {
             $this->view->removeCookies();
-            //TODO Flytta till userstorage bort med string beroende
-            unset($_SESSION['SessionName']);
+            $this->userStorage->endSession();
             $this->view->setMessage("Bye bye!");
         }
     }
@@ -64,7 +64,7 @@ class LoginUserController {
         if ($this->view->rememberMe() && $user) {
             $user->setTempPassword();
             $this->view->setCookies($user, $this->cookieExpiresIn);
-            $this->auth->saveAuthUser($user);
+            $this->auth->saveAuthCredentials($user);
          }
     }
 

@@ -5,18 +5,17 @@ namespace Model;
 require_once('Exceptions/LoginUserException.php');
 require_once('DAL/DbUserTable.php');
 
-class LoginUser {
+class UserStorage {
     private static $sessionName = 'SessionName';
     private static $userAgent = 'UserAgent';
     private $loggedInUser;
     private $storage;
 
-    public function __construct(User $user) {
+    public function __construct() {
         $this->storage = new \Model\DbUserTable();
-        $this->setUser($user);
     }
 
-    private function setUser($user) {
+    public function validateCredentials($user) {
         if (!$this->storage->fetchUser($user)) {
             throw new WrongCredentialsException();
         }
@@ -25,28 +24,35 @@ class LoginUser {
             throw new WrongCredentialsException();
         }
 
-        $this->loggedInUser = $user;
+        session_regenerate_id();
     }
-    
+  
+    public function startNewSession(User $user) {  
+        $_SESSION[self::$sessionName] = $user->getUsername();
+        $_SESSION[self::$userAgent] =  $this->getBrowserName();
+    }
+
+    public function endSession() {
+        unset($_SESSION[self::$sessionName]);
+        unset($_SESSION[self::$userAgent]);
+    }
+
+    public static function isUserLoggedIn() : bool {
+       return isset($_SESSION[self::$sessionName]);
+    }
+
+    private function getBrowserName() {
+        return $_SERVER["HTTP_USER_AGENT"];
+    }
+
     private function checkSession() {
-        if (!isset($_SERVER["HTTP_USER_AGENT"])) {
+        if (!$this->getBrowserName()) {
             return FALSE;
         }
         if(!isset($_SESSION[self::$userAgent])) {
             return FALSE;
         }
-        return $_SERVER["HTTP_USER_AGENT"] === $_SESSION[self::$userAgent];
-    }
-
-   
-    public function startNewSession(User  $user) {
-        session_regenerate_id();
-        $_SESSION[self::$sessionName] = $user;
-        $_SESSION[self::$userAgent] = $_SERVER["HTTP_USER_AGENT"];
-    }
-
-    public static function isUserLoggedIn() : bool {
-       return isset($_SESSION[self::$sessionName]);
+        return $this->getBrowserName() === $_SESSION[self::$userAgent];
     }
     
     //TODO FIX!!
