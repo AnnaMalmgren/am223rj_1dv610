@@ -9,15 +9,13 @@ class User {
     private $username;
     private $password;
     public $tempPassword;
-    private $storage;
     private $minUsernameLength = 3;
     private $minPassswordLength = 6;
     private $bytesLength = 12;
 
     public function __construct($username, $password) {
-            $this->storage = new DbUserTable();
-            $this->setUsername($username);
-            $this->setPassword($password);
+        $this->setUsername($username);
+        $this->setPassword($password);
     }
 
     public function getUsername() {

@@ -4,7 +4,7 @@ namespace Controller;
 require_once(__DIR__ . '/../model/RegisteredUser.php');
 require_once(__DIR__ . '/../model/User.php');
 
-class RegUserController {
+class RegisterController {
     private $userIsRegistered = FALSE;
     private $view;
     private $loginView;
@@ -34,12 +34,13 @@ class RegUserController {
     private function doRegisterUser() {
         $userCredentials = $this->view->getUser();
         $registeredUser = new \Model\RegisteredUser($userCredentials);
-        $this->setSuccesScenario($userCredentials);
+        $this->setSuccesfulRegisterView($userCredentials);
     }
 
-    private function setSuccesScenario(\Model\User $user) {
+    private function setSuccesfulRegsiterView(\Model\User $user) {
         $this->loginView->setMessage(self::$successMsg);
         $this->loginView->setUsername($user->getUsername());
-         $this->userIsRegistered = TRUE;   
+        $this->userIsRegistered = TRUE;   
     }
+
 }

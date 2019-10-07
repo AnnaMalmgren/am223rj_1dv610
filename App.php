@@ -3,8 +3,8 @@ require_once('view/LoginView.php');
 require_once('view/DateTimeView.php');
 require_once('view/LayoutView.php');
 require_once('view/RegisterView.php');
-require_once('controller/RegUserController.php');
-require_once('controller/LoginUserController.php');
+require_once('controller/RegisterController.php');
+require_once('controller/LoginController.php');
 
 class App {
     private $view;
@@ -20,8 +20,8 @@ class App {
         $this->timeView = new \View\DateTimeView();
         $this->view = new \View\LayoutView();
 
-        $this->regController = new \Controller\RegUserController($this->regView, $this->loginView);
-        $this->loginController = new \Controller\LoginUserController($this->loginView);
+        $this->regController = new \Controller\RegisterController($this->regView, $this->loginView);
+        $this->loginController = new \Controller\LoginController($this->loginView);
     }
 
     public function runApp() {
@@ -31,8 +31,8 @@ class App {
     }
 
     private function changeState() {
-        $this->loginController->loginUser();
-        $this->loginController->authUser();
+        $this->loginController->loginUserByRequest();
+        $this->loginController->loginUserByAuth();
         $this->regController->registerUser();
         $this->loginController->logoutUser();
     }
@@ -42,7 +42,7 @@ class App {
             $this->renderLoginView(); 
         } else {
             $this->view->userClicksRegisterLink() ? 
-                $this->renderRegisterView() : $this->renderLoginView();
+            $this->renderRegisterView() : $this->renderLoginView();
         }
     }
 

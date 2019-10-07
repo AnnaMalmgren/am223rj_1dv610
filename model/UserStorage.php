@@ -21,7 +21,7 @@ class UserStorage {
         $this->loggedInUser = $user; 
     }
 
-    public function setUserLoggedIn() {
+    public function setUserSession() {
         session_regenerate_id(); 
         $_SESSION[self::$sessionName] = $this->loggedInUser->getUsername();
         $_SESSION[self::$userAgent] =  $this->getBrowserName();
