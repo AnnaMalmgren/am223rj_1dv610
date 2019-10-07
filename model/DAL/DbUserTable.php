@@ -5,7 +5,6 @@ namespace Model;
 require_once('DBconn.php');
 
  class DbUserTable extends DBconn {
-     private static $colPwd = 'password';
 
     public function fetchUser(User $user) {
         $sql = "SELECT * FROM users WHERE BINARY username=?";
@@ -19,11 +18,6 @@ require_once('DBconn.php');
         $types = "ss";
         $params = [$user->getUsername(), $this->hashedPassword($user)];
         $this->saveToDB($sql, $types, $params);
-    }
-
-    public function verifyPassword (User $user) : bool {
-        $userData = $this->fetchUser($user);
-        return password_verify($user->getPassword(), $userData[self::$colPwd]);       
     }
 
     private function hashedPassword($user) {

@@ -56,10 +56,4 @@ class User {
         $this->tempPassword = bin2hex(random_bytes($this->bytesLength));
      }
 
-     public function saveRegisteredUser($user) {
-        if ($this->storage->fetchUser($user)) {
-            throw new UsernameExistsException();
-        }
-        $this->storage->saveUser($user);
-    }
 }

@@ -2,47 +2,61 @@
 
 namespace Model;
 
+require_once('DAL/DbUserTable.php');
 require_once('DAL/DbAuthTable.php');
 
 class Authentication {
-    private $storage;
-    private static $colPwd = 'passwordHash';
+    private $auhtDAL;
+    private $userDAL;
+    private static $colTempPwd= 'passwordHash';
+    private static $colPwd = 'password';
     private static $colExpireDate = 'expireDate';
 
 
     public function __construct() {
-        $this->storage = new \Model\DbAuthTable(); 
+        $this->authDAL = new \Model\DbAuthTable();
+        $this->userDAL = new \Model\DbUserTable();
     }
 
-    public function validateCredentials(User $user) {
-       $this->verifyCookies($user);
-       session_regenerate_id();
+    public function validateRequestCredentials(User $user) {
+        if (!$this->userDAL->fetchUser($user)) {
+            throw new WrongCredentialsException();
+        }
+
+        if (!$this->verifyPassword($user)) {
+            throw new WrongCredentialsException();
+        }
     }
 
-    private function verifyPwdToken(User $user) : bool {
-        $this->userData = $this->storage->getAuthUser($user); 
-        return password_verify($user->getPassword(), $this->userData[self::$colPwd]);
+    private function verifyPassword (User $user) : bool {
+        $userData = $this->userDAL->fetchUser($user);
+        return password_verify($user->getPassword(), $userData[self::$colPwd]);       
     }
 
-    private function verifyExpireDate($user) : bool {
-        $this->userData = $this->storage->getAuthUser($user); 
-        $currentDate = date("Y-m-d H:i:s", time());
-        $expireDate = $this->userData[self::$colExpireDate];
-        return $expireDate > $currentDate;
-    }  
-
-    private function verifyCookies(User $user) {
-        // Check if cookie expiredate and pwd is valid.
+    public function validateAuthCredentials(User $user) {
         $expireDateCheck = $this->verifyExpireDate($user);
-        $pwdTokenCheck = $this->verifyPwdToken($user);
+        $pwdTokenCheck = $this->verifyTempPwd($user);
 
         if (!$expireDateCheck || !$pwdTokenCheck ) {
             throw new \Model\WrongCookieInfoException();
         }
     }
 
+    private function verifyExpireDate($user) : bool {
+        $this->userData = $this->authDAL->getAuthUser($user); 
+        $currentDate = date("Y-m-d H:i:s", time());
+        $expireDate = $this->userData[self::$colExpireDate];
+        return $expireDate > $currentDate;
+    }  
+
+    private function verifyTempPwd(User $user) : bool {
+        $this->userData = $this->authDAL->getAuthUser($user); 
+        return password_verify($user->getPassword(), $this->userData[self::$colTempPwd]);
+    }
+
+
     public function saveAuthCredentials($user) {
-        $this->storage->saveAuthUser($user);
+        $this->authDAL->saveAuthUser($user);
     }
 
 }

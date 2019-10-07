@@ -84,11 +84,11 @@ class LoginView {
 	}
 
 	public function setWelcomeMessage() {
-		if ($this->rememberMe() && !$this->isLoggedIn()) {
+		if ($this->rememberMe()) {
 			$this->setMessage("Welcome and you will be remembered");
-		} else if ($this->userWantsToAuthenticate() && !$this->isLoggedIn()) {
+		} else if ($this->userWantsToAuthenticate()) {
 			$this->setMessage("Welcome back with cookie");
-		} else if (!$this->isLoggedIn()){
+		} else {
 			$this->setMessage("Welcome");
 		}
 	}

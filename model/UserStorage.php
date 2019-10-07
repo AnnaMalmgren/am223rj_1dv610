@@ -3,33 +3,49 @@
 namespace Model;
 
 require_once('Exceptions/LoginUserException.php');
+require_once('Authentication.php');
 require_once('DAL/DbUserTable.php');
 
 class UserStorage {
     private static $sessionName = 'SessionName';
     private static $userAgent = 'UserAgent';
+    private $auth;
     private $loggedInUser;
-    private $storage;
 
     public function __construct() {
-        $this->storage = new \Model\DbUserTable();
+        $this->auth = new Authentication();
     }
 
-    public function validateCredentials($user) {
-        if (!$this->storage->fetchUser($user)) {
-            throw new WrongCredentialsException();
-        }
-
-        if (!$this->storage->verifyPassword($user)) {
-            throw new WrongCredentialsException();
-        }
-
-        session_regenerate_id();
+    public function loginUserByRequest(User $user) {
+        $this->auth->validateRequestCredentials($user);
+        $this->loggedInUser = $user; 
+        $this->startNewSession($this->loggedInUser);
     }
-  
-    public function startNewSession(User $user) {  
+
+    private function startNewSession(User $user) { 
+        session_regenerate_id(); 
         $_SESSION[self::$sessionName] = $user->getUsername();
         $_SESSION[self::$userAgent] =  $this->getBrowserName();
+    }
+
+    private function getBrowserName() {
+        return $_SERVER["HTTP_USER_AGENT"];
+    }
+
+    public function keepMeLoggedIn() {
+        $this->loggedInUser->setTempPassword();
+        $this->auth->saveAuthCredentials($this->loggedInUser);
+    }
+
+    public function loginUserByAuth(User $user) {
+        $this->auth->validateAuthCredentials($user);
+        $this->loggedInUser = $user;
+        $this->startNewSession($this->loggedInUser);
+    }
+
+
+    public function getLoggedInUser() {
+        return $this->loggedInUser;
     }
 
     public function endSession() {
@@ -41,8 +57,15 @@ class UserStorage {
        return isset($_SESSION[self::$sessionName]);
     }
 
-    private function getBrowserName() {
-        return $_SERVER["HTTP_USER_AGENT"];
+        //TODO FIX!!
+    public function controllSession() {
+        if (isset($_SESSION[self::$sessionId])){
+            if(!$this->checkSession()) {
+                return FALSE;
+            } else {
+                return TRUE;
+            }
+        }
     }
 
     private function checkSession() {
@@ -54,16 +77,5 @@ class UserStorage {
         }
         return $this->getBrowserName() === $_SESSION[self::$userAgent];
     }
-    
-    //TODO FIX!!
-    public function controllSession() {
-    if (isset($_SESSION[self::$sessionId])){
-        if(!$this->checkSession()) {
-            return FALSE;
-        } else {
-            return TRUE;
-        }
 
-    }
-}
 }

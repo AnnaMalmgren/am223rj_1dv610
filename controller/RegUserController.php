@@ -1,6 +1,7 @@
 <?php 
 namespace Controller;
 
+require_once(__DIR__ . '/../model/RegisteredUser.php');
 require_once(__DIR__ . '/../model/User.php');
 
 class RegUserController {
@@ -18,21 +19,23 @@ class RegUserController {
         return $this->userIsRegistered;
     }
     
-    public function doRegisterUser () {
-        if($this->view->userWantsToRegister()) {
-          $this->registerUser();
+    public function registerUser () {
+        try {
+                if($this->view->userWantsToRegister()) {
+                    $this->doRegisterUser();
+                }
+
+        } catch (\Model\RegisterUserException $e) {
+                $message = $e->getMessage();
+                $this->view->setMessage($message);
         }
+        
     }
 
-    private function registerUser() {
-        try {
-            $userCredentials = $this->view->getUser();
-            $userCredentials->saveRegisteredUser($userCredentials);
-            $this->setSuccesScenario($userCredentials);
-        } catch (\Model\RegisterUserException $e) {
-            $message = $e->getMessage();
-            $this->view->setMessage($message);
-        }
+    private function doRegisterUser() {
+        $userCredentials = $this->view->getUser();
+        $registeredUser = new \Model\RegisteredUser($userCredentials);
+        $this->setSuccesScenario($userCredentials);
     }
 
     private function setSuccesScenario(\Model\User $user) {
