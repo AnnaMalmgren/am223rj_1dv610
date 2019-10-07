@@ -20,11 +20,7 @@ class RegisterView extends LoginView {
 	 * @return  void
 	 */
 	public function response() {
-	
-		$message = $this->message;
-
-        return $this->generateRegisterFormHTML($message);
-
+		return $this->generateRegisterFormHTML($this->message);
 	}
 
 	public function getRequestName() : string {

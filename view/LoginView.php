@@ -15,26 +15,27 @@ class LoginView {
 	private static $messageId = 'LoginView::Message';
 	private $message = "";
 	private $username = "";
+	private $userStorage;
 
-	/**
-	 * Create HTTP response
-	 *
-	 * Should be called after a login attempt has been determined
-	 *
-	 * @return  void BUT writes to standard output and cookies!
-	 */
-	public function response() {
-
-        if ($this->isLoggedIn()) {
-			return $this->generateLogoutButtonHTML($this->message);
-		} else {
-			return $this->generateLoginFormHTML($this->message);
-		}
+	public function __construct() {
+		$this->userStorage = new \Model\UserStorage();
 	}
 
 	public function userWantsToAuthenticate() : bool {
 		return !empty($_COOKIE[self::$cookieName]) && !empty($_COOKIE[self::$cookiePassword]);
 	  }
+
+	public function userWantsToLogin() : bool {
+		return isset($_POST[self::$login]);
+	}
+
+	public function userWantsToLogout() : bool {
+		return isset($_POST[self::$logout]);
+	}
+
+	public function rememberMe() : bool {
+		return isset($_POST[self::$keep]);
+	}
 
 	public function getRequestName() : string {
 		return trim($_POST[self::$name]);
@@ -43,27 +44,6 @@ class LoginView {
 	public function getRequestPwd() : string {
 		return trim($_POST[self::$password]);
 	}
-
-	public function isLoggedIn() {
-		return \Model\UserStorage::isUserLoggedIn();
-	}
-
-	/**
-	 * Checks if user clicked "keep me logged in".
-	 */
-	public function rememberMe() : bool {
-		return isset($_POST[self::$keep]);
-	}
-
-	public function userWantsToLogin() : bool {
-		return isset($_POST[self::$login]);
-	}
-
-
-	public function userWantsToLogout() : bool {
-		return isset($_POST[self::$logout]);
-	}
-	
 	
 	public function getUserCredentials() : \Model\User {
 		if (empty($this->getRequestName())) {
@@ -78,21 +58,28 @@ class LoginView {
 		return new \Model\User($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
 	}
 
-	
 	public function setMessage($message) : string {
 		return $this->message = $message;
 	}
 
 	public function setWelcomeMessage() {
-		if ($this->rememberMe()) {
-			$this->setMessage("Welcome and you will be remembered");
-		} else if ($this->userWantsToAuthenticate()) {
-			$this->setMessage("Welcome back with cookie");
-		} else {
-			$this->setMessage("Welcome");
+		if ($this->rememberMe() && !$this->isLoggedIn()) {
+			$this->message = "Welcome and you will be remembered";
+		} else if ($this->userWantsToAuthenticate() && !$this->isLoggedIn()) {
+			$this->message = "Welcome back with cookie";
+		} else if (!$this->isLoggedIn()){
+			$this->message = "Welcome";
 		}
 	}
-	
+
+	public function setByeMessage() {
+		$this->message = "Bye bye!";
+	}
+
+	public function isLoggedIn() {
+		return $this->userStorage->isUserLoggedIn();
+	}
+
 	public function setUsername($username) {
 		$this->username = $username;
 	}
@@ -115,11 +102,15 @@ class LoginView {
 		setcookie(self::$cookiePassword, "", time() - 3600);
 	}
 
-	/**
-	* Generate HTML code on the output buffer for the logout button
-	* @param $message, String output message
-	* @return  void, BUT writes to standard output!
-	*/
+	public function response() {
+
+        if ($this->isLoggedIn()) {
+			return $this->generateLogoutButtonHTML($this->message);
+		} else {
+			return $this->generateLoginFormHTML($this->message);
+		}
+	}
+
 	private function generateLogoutButtonHTML($message) {
 		return '
 			<form  method="post" >
@@ -129,12 +120,6 @@ class LoginView {
 		';
 	}
 
-	
-	/**
-	* Generate HTML code on the output buffer for the logout button
-	* @param $message, String output message
-	* @return  void, BUT writes to standard output!
-	*/
 	private function generateLoginFormHTML($message) {
 		return '
 			<form method="post" action="?" > 

@@ -19,12 +19,11 @@ class UserStorage {
     public function loginUserByRequest(User $user) {
         $this->auth->validateRequestCredentials($user);
         $this->loggedInUser = $user; 
-        $this->startNewSession($this->loggedInUser);
     }
 
-    private function startNewSession(User $user) { 
+    public function setUserLoggedIn() {
         session_regenerate_id(); 
-        $_SESSION[self::$sessionName] = $user->getUsername();
+        $_SESSION[self::$sessionName] = $this->loggedInUser->getUsername();
         $_SESSION[self::$userAgent] =  $this->getBrowserName();
     }
 
@@ -40,7 +39,6 @@ class UserStorage {
     public function loginUserByAuth(User $user) {
         $this->auth->validateAuthCredentials($user);
         $this->loggedInUser = $user;
-        $this->startNewSession($this->loggedInUser);
     }
 
 
@@ -53,7 +51,7 @@ class UserStorage {
         unset($_SESSION[self::$userAgent]);
     }
 
-    public static function isUserLoggedIn() : bool {
+    public function isUserLoggedIn() : bool {
        return isset($_SESSION[self::$sessionName]);
     }
 

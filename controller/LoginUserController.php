@@ -9,6 +9,7 @@ class LoginUserController {
     private $view;
     private $cookieExpiresIn; 
     private $userStorage;
+    private $welcomeMsgShown = TRUE;
 
     public function __construct(\View\LoginView $loginView) {
         $this->view = $loginView;
@@ -21,10 +22,13 @@ class LoginUserController {
             if ($this->view->userWantsToLogin()) {
                 $this->doLoginUser();
                 $this->view->setWelcomeMessage();
+                $this->userStorage->setUserLoggedIn();
             } 
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
             $this->view->setMessage($message);
+        } catch (\Model\RegisterUserException $e) {
+            $this->view->setMessage(""); 
         }
     }
 
@@ -46,6 +50,7 @@ class LoginUserController {
                 if ($this->view->userWantsToAuthenticate() && !$this->userStorage->isUserLoggedIn()) {
                     $this->doAuthentication();
                     $this->view->setWelcomeMessage();
+                    $this->userStorage->setUserLoggedIn();
                 }
         } catch (\Model\LoginUserException $e) {
             $message = $e->getMessage();
@@ -62,7 +67,7 @@ class LoginUserController {
         if ($this->view->userWantsToLogout() && $this->userStorage->isUserLoggedIn()) {
             $this->view->removeCookies();
             $this->userStorage->endSession();
-            $this->view->setMessage("Bye bye!");
+            $this->view->setByeMessage();
         }
     }
 }

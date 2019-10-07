@@ -54,7 +54,6 @@ class Authentication {
         return password_verify($user->getPassword(), $this->userData[self::$colTempPwd]);
     }
 
-
     public function saveAuthCredentials($user) {
         $this->authDAL->saveAuthUser($user);
     }

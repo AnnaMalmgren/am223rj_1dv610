@@ -28,8 +28,7 @@ class RegUserController {
         } catch (\Model\RegisterUserException $e) {
                 $message = $e->getMessage();
                 $this->view->setMessage($message);
-        }
-        
+        }   
     }
 
     private function doRegisterUser() {
