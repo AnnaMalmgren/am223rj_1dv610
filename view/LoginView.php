@@ -44,32 +44,53 @@ class LoginView {
 	public function getRequestPwd() : string {
 		return trim($_POST[self::$password]);
 	}
+
+	public function isCredentialsSet() : bool {
+		return !empty($this->getRequestName()) && !empty($this->getRequestPwd());
+	}
+
+	public function setCredentialsMissingMsg() {
+		if (empty($this->getRequestName())) {
+			$this->message = 'Username is missing';
+		} else if (empty($this->getRequestPwd())) {
+			$this->message = 'Password is missing';
+		}
+	}
 	
 	public function getUserCredentials() : \Model\User {
-		if (empty($this->getRequestName())) {
-			throw new \Model\LoginUserException('Username is missing');
-		} else if (empty($this->getRequestPwd())) {
-			throw new \Model\LoginUserException('Password is missing');
-		}
 		return new \Model\User($this->getRequestName(), $this->getRequestPwd());
 	}
 
-	public function getAuthCredentials() : \Model\User {
+	public function getCookieCredentials() : \Model\User {
 		return new \Model\User($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
 	}
 
-	public function setMessage($message) : string {
-		return $this->message = $message;
+	public function setWrongNameOrPwd() {
+		$this->message = "Wrong name or password";
 	}
 
-	public function setWelcomeMessage() {
-		if ($this->rememberMe() && !$this->isLoggedIn()) {
-			$this->message = "Welcome and you will be remembered";
-		} else if ($this->userWantsToAuthenticate() && !$this->isLoggedIn()) {
-			$this->message = "Welcome back with cookie";
-		} else if (!$this->isLoggedIn()){
+	public function setWrongInfoInCookies() {
+		$this->message = "Wrong information in cookies";
+	}
+
+	public function setWelcomeMsg() {
+		if ($this->hasBeenViewed()) {
 			$this->message = "Welcome";
 		}
+	}
+
+	private function hasBeenViewed() {
+		return !$this->isLoggedIn();
+	}
+
+	public function setRememberMeWelcomeMsg() {
+		if ($this->hasBeenViewed()) {
+			$this->message = "Welcome and you will be remembered";
+		}
+	}
+
+	public function setWelcomeBackMsg() {
+		$this->message = "Welcome back with cookie";
 	}
 
 	public function setByeMessage() {

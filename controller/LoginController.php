@@ -19,44 +19,46 @@ class LoginController {
     
     public function loginUserByRequest() {
         try {
-           
-            $this->tryLoginUser();
-            
+                $this->tryLoginUser();
+
         } catch (\Model\LoginUserException $e) {
-            $this->handleLoginException($e);
-        } catch (\Model\RegisterUserException $e) {
-            $this->handleRegisterException($e); 
-        }
+            $this->setLoginErrorMsg($e);
+        } catch (\Model\RegisterUserException $e) {}
     }
    
+    //TODO BREAK OUT TO SMALLER FUNCTION HELP WITH NAMING.
     private function tryLoginUser() {
         if ($this->view->userWantsToLogin()) {
-            $userCredentials = $this->view->getUserCredentials();
-            $this->userStorage->loginUserByRequest($userCredentials);
-            $this->doKeepMeLoggedIn();
-            $this->setWelcomeMsgAndUserSession();
+            if ($this->view->isCredentialsSet()) {
+                $userCredentials = $this->view->getUserCredentials();
+                $this->userStorage->loginUserByRequest($userCredentials);
+                $this->view->setWelcomeMsg();
+                $this->doKeepMeLoggedIn();
+                $this->userStorage->setUserSession();
+            } else {
+                $this->view->setCredentialsMissingMsg();
+            }
         }
     }
 
     private function doKeepMeLoggedIn() {
         if ($this->view->rememberMe()) {
-            $this->userStorage->keepMeLoggedIn();
+            $this->userStorage->saveCredentials();
             $this->view->setCookies($this->userStorage->getLoggedInUser(), $this->cookieExpiresIn);
+            $this->view->setRememberMeWelcomeMsg();
         }
     }
 
-    private function handleLoginException(\Model\LoginUserException $e) {
-        $message = $e->getMessage();
-        $this->view->setMessage($message);
+    private function setLoginErrorMsg(\Model\LoginUserException $e) {
+        if ($e instanceof \Model\WrongCredentialsException) {
+            $this->view->setWrongNameOrPwd();
+        }
     }
 
-    private function handleRegisterException(\Model\RegisterUserException $e) {
-       return;
-    }
-
-    private function setWelcomeMsgAndUserSession() {
-        $this->view->setWelcomeMessage();
-        $this->userStorage->setUserSession();
+    private function setCookieLoginErrorMsg(\Model\LoginUserException $e) {
+        if ($e instanceof \Model\WrongCookieInfoException) {
+            $this->view->setWrongInfoInCookies();
+        }
     }
 
     public function loginUserByAuth() {
@@ -64,21 +66,20 @@ class LoginController {
                 $this->tryAuthAndLogin();
 
         } catch (\Model\LoginUserException $e) {
-            $this->handleLoginException($e);
-        } catch (\Model\RegisterUserException $e) {
-            $this->handleRegisterException($e); 
-        }
+            $this->setCookieLoginErrorMsg($e);
+        } catch (\Model\RegisterUserException $e) {}
     }
 
     private function tryAuthAndLogin() {
-        if ($this->userWantsToAuthenticate()) {
-            $authCredentials = $this->view->getAuthCredentials();
-            $this->userStorage->loginUserByAuth($authCredentials);
-            $this->setWelcomeMsgAndUserSession();
+        if ($this->userWantsToLoginWithCookies()) {
+            $authCredentials = $this->view->getCookieCredentials();
+            $this->userStorage->loginUserByCookies($authCredentials);
+            $this->view->setWelcomeBackMsg();
+            $this->userStorage->setUserSession();
         }
     }
 
-    private function userWantsToAuthenticate() : bool  {
+    private function userWantsToLoginWithCookies() : bool  {
         return $this->view->userWantsToAuthenticate() && !$this->userStorage->isUserLoggedIn();
     }
 

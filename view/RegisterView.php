@@ -12,17 +12,6 @@ class RegisterView extends LoginView {
 	private $message = "";
 	
 
-    /**
-	 * Create HTTP response
-	 *
-	 * Should be called after a register attempt has been determined
-	 *
-	 * @return  void
-	 */
-	public function response() {
-		return $this->generateRegisterFormHTML($this->message);
-	}
-
 	public function getRequestName() : string {
 		return trim($_POST[self::$name]);
 	}
@@ -47,24 +36,49 @@ class RegisterView extends LoginView {
 		 }
 	}
 
-	public function getUser() : \Model\User {
-		$username = $this->getRequestName();
-		$password = $this->getRequestPwd();
-
-		if (empty($username) && empty($password)) {
-			throw new \Model\RegisterUserException('Username has too few characters, at least 3 characters.<br>Password has too few characters, at least 6 characters.');
-		}
-
-		if ($password !== $this->getRequestPwdRepeat()) {
-            throw new \Model\PasswordsDontMatchException();
-        }
-		
-		return new \Model\User($username, $password);
+	public function isFieldMissing() : bool {
+		return empty($this->getRequestName()) && empty($this->getRequestPwd());
 	}
 
-	
-	public function setMessage($message) : string {
-		return $this->message = $message;
+	public function doesPasswordsMatch() : bool {
+		return $this->getRequestPwd() == $this->getRequestPwdRepeat();
+	}
+
+	public function getUser() : \Model\User {
+		return new \Model\User($this->getRequestName(), $this->getRequestPwd());
+	}
+
+	public function setCredentialsMissingMsg() {
+		if ($this->isFieldMissing()) {
+			$userNameMsg = 'Username has too few characters, at least 3 characters.';
+			$PwdMsg = 'Password has too few characters, at least 6 characters.';
+			$this->message = "$userNameMsg<br>$PwdMsg";
+		} 
+	}
+
+	public function setToShortUsernameMessage() {
+		$this->message = 'Username has too few characters, at least 3 characters.';
+	}
+
+	public function setToShortPwdMessage() {
+		$this->message = 'Password has too few characters, at least 6 characters.';
+	}
+
+	public function setInvalidCharactersMessage() {
+		$this->message = 'Username contains invalid characters';
+	}
+
+	public function setUserExistsMessage() {
+		$this->message = 'User exists, pick another username.';
+	}
+
+	public function setPwdsDontMatchMessage() {
+		$this->message = 'Passwords do not match.';
+	}
+
+
+	public function response() {
+		return $this->generateRegisterFormHTML($this->message);
 	}
 
     /**

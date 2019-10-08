@@ -21,26 +21,54 @@ class RegisterController {
     
     public function registerUser () {
         try {
-                if($this->view->userWantsToRegister()) {
-                    $this->doRegisterUser();
-                }
+                $this->doRegisterUser();
 
         } catch (\Model\RegisterUserException $e) {
-                $message = $e->getMessage();
-                $this->view->setMessage($message);
+            $this->setRegisterErrorMsg($e);
         }   
     }
-
+    
+    //TODO BREAK OUT TO SMALLER FUNCTION HELP WITH NAMING.
     private function doRegisterUser() {
-        $userCredentials = $this->view->getUser();
-        $registeredUser = new \Model\RegisteredUser($userCredentials);
-        $this->setSuccesfulRegisterView($userCredentials);
+        if($this->view->userWantsToRegister()) {
+            if ($this->isCredentialsValid()) {
+                $userCredentials = $this->view->getUser();
+                $registeredUser = new \Model\RegisteredUser($userCredentials);
+                $this->setSuccesfullRegisterView($userCredentials);
+            } else {
+                $this->setNotValidCredentialsMsg();
+            }
+        }
     }
 
-    private function setSuccesfulRegsiterView(\Model\User $user) {
+    private function isCredentialsValid() {
+       return !$this->view->isFieldMissing() && $this->view->doesPasswordsMatch();
+    }
+
+    private function setSuccesfullRegsiterView(\Model\User $user) {
         $this->loginView->setMessage(self::$successMsg);
         $this->loginView->setUsername($user->getUsername());
         $this->userIsRegistered = TRUE;   
+    }
+
+    private function setNotValidCredentialsMsg() {
+        if ($this->view->isFieldMissing()) {
+            $this->view->setCredentialsMissingMsg();
+        } else if (!$this->view->doesPasswordsMatch()) {
+            $this->view->setPwdsDontMatchMessage();
+        }
+    }
+
+    private function setRegisterErrorMsg(\Model\RegisterUserException $e) {
+        if ($e instanceof \Model\ToShortUserNameException) {
+            $this->view->setToShortUsernameMessage();
+        } else if ($e instanceof \Model\ToShortPasswordException) {
+            $this->view->setToShortPwdMessage();
+        } else if ($e instanceof \Model\InvalidCharactersException) {
+            $this->view->setInvalidCharactersMessage();
+        } else if ($e instanceof \Model\UsernameExistsException) {
+            $this->view->setUserExistsMessage();
+        } 
     }
 
 }

@@ -2,12 +2,8 @@
 namespace Model;
 class LoginUserException extends \Exception{}
 
-class WrongCredentialsException extends LoginUserException {
-  protected $message = "Wrong name or password";
-}
+class WrongCredentialsException extends LoginUserException {}
 
-class WrongCookieInfoException extends LoginUserException {
-  protected $message = "Wrong information in cookies";
-}
+class WrongCookieInfoException extends LoginUserException {}
 
 

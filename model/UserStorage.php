@@ -4,7 +4,6 @@ namespace Model;
 
 require_once('Exceptions/LoginUserException.php');
 require_once('Authentication.php');
-require_once('DAL/DbUserTable.php');
 
 class UserStorage {
     private static $sessionName = 'SessionName';
@@ -24,19 +23,19 @@ class UserStorage {
     public function setUserSession() {
         session_regenerate_id(); 
         $_SESSION[self::$sessionName] = $this->loggedInUser->getUsername();
-        $_SESSION[self::$userAgent] =  $this->getBrowserName();
+        $_SESSION[self::$userAgent] =  $this->getClientsBrowserName();
     }
 
-    private function getBrowserName() {
+    private function getClientsBrowserName() {
         return $_SERVER["HTTP_USER_AGENT"];
     }
 
-    public function keepMeLoggedIn() {
+    public function saveCredentials() {
         $this->loggedInUser->setTempPassword();
         $this->auth->saveAuthCredentials($this->loggedInUser);
     }
 
-    public function loginUserByAuth(User $user) {
+    public function loginUserByCookies(User $user) {
         $this->auth->validateAuthCredentials($user);
         $this->loggedInUser = $user;
     }
@@ -67,13 +66,13 @@ class UserStorage {
     }
 
     private function checkSession() {
-        if (!$this->getBrowserName()) {
+        if (!$this->getClientsBrowserName()) {
             return FALSE;
         }
         if(!isset($_SESSION[self::$userAgent])) {
             return FALSE;
         }
-        return $this->getBrowserName() === $_SESSION[self::$userAgent];
+        return $this->getClientsBrowserName() === $_SESSION[self::$userAgent];
     }
 
 }
