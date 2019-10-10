@@ -8,24 +8,25 @@ class RegisterController {
     private $userIsRegistered = FALSE;
     private $view;
     private $loginView;
-    private static $successMsg = "Registered new user.";
 
     public function __construct(\View\RegisterView $registerView, \View\LoginView $loginView) {
         $this->view = $registerView;
         $this->loginView = $loginView;
-    }
-
-    public function getUserIsRegistered() {
-        return $this->userIsRegistered;
     }
     
     public function registerUser () {
         try {
                 $this->doRegisterUser();
 
-        } catch (\Model\RegisterUserException $e) {
-            $this->setRegisterErrorMsg($e);
-        }   
+        } catch (\Model\ToShortUserNameException $e) {
+            $this->view->setToShortUsernameMessage();
+        } catch (\Model\ToShortPasswordException $e) {
+            $this->view->setToShortPwdMessage();
+        } catch (\Model\InvalidCharactersException $e) {
+            $this->view->setInvalidCharactersMessage();
+        } catch (\Model\UsernameExistsException $e) {
+            $this->view->setUserExistsMessage();
+        } 
     }
     
     //TODO BREAK OUT TO SMALLER FUNCTION HELP WITH NAMING.
@@ -46,7 +47,7 @@ class RegisterController {
     }
 
     private function setSuccesfullRegsiterView(\Model\User $user) {
-        $this->loginView->setMessage(self::$successMsg);
+        $this->loginView->setUserRegisteredMsg();
         $this->loginView->setUsername($user->getUsername());
         $this->userIsRegistered = TRUE;   
     }
@@ -58,17 +59,8 @@ class RegisterController {
             $this->view->setPwdsDontMatchMessage();
         }
     }
-
-    private function setRegisterErrorMsg(\Model\RegisterUserException $e) {
-        if ($e instanceof \Model\ToShortUserNameException) {
-            $this->view->setToShortUsernameMessage();
-        } else if ($e instanceof \Model\ToShortPasswordException) {
-            $this->view->setToShortPwdMessage();
-        } else if ($e instanceof \Model\InvalidCharactersException) {
-            $this->view->setInvalidCharactersMessage();
-        } else if ($e instanceof \Model\UsernameExistsException) {
-            $this->view->setUserExistsMessage();
-        } 
+    
+    public function getUserIsRegistered() {
+        return $this->userIsRegistered;
     }
-
 }

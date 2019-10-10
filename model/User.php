@@ -18,10 +18,6 @@ class User {
         $this->setPassword($password);
     }
 
-    public function getUsername() {
-        return $this->username;
-    }
-
     private function setUsername($username) {
         if (strlen($username) < $this->minUsernameLength) {
             throw new ToShortUserNameException();
@@ -34,16 +30,20 @@ class User {
         $this->username = $username;
     }
 
-    public function getPassword() {
-        return $this->password;
-    }
-
     private function setPassword($password) {
         if (strlen($password) < $this->minPassswordLength) {
             throw new ToShortPasswordException();
         }
 
         $this->password = $password;
+    }
+
+    public function getUsername() {
+        return $this->username;
+    }
+
+    public function getPassword() {
+        return $this->password;
     }
 
     public function getTempPassword() {

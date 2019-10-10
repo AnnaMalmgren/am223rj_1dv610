@@ -18,43 +18,50 @@ class Authentication {
         $this->userDAL = new \Model\DbUserTable();
     }
 
-    public function validateRequestCredentials(User $user) {
-        if (!$this->userDAL->fetchUser($user)) {
+    public function validateRequestCredentials(UserCredentials $credentials) : User {
+        $user = $this->userDAL->getUser($credentials);
+        if (!$user) {
             throw new WrongCredentialsException();
         }
 
-        if (!$this->verifyPassword($user)) {
+        if (!$this->verifyPassword($credentials)) {
             throw new WrongCredentialsException();
         }
+
+        return $user;
     }
 
-    private function verifyPassword (User $user) : bool {
-        $userData = $this->userDAL->fetchUser($user);
-        return password_verify($user->getPassword(), $userData[self::$colPwd]);       
+    private function verifyPassword (UserCredentials $credentials) : bool {
+        $userData = $this->userDAL->getUser($credentials);
+        return password_verify($credentials->getPassword(), $userData[self::$colPwd]);       
     }
 
-    public function validateAuthCredentials(User $user) {
-        $expireDateCheck = $this->verifyExpireDate($user);
-        $pwdTokenCheck = $this->verifyTempPwd($user);
+    public function validateAuthCredentials(UserCredentials $credentials) : User{
+        $user = $this->authDAL->getAuthUser($credentials);
+
+        $expireDateCheck = $this->verifyExpireDate($credentials);
+        $pwdTokenCheck = $this->verifyTempPwd($credentials);
 
         if (!$expireDateCheck || !$pwdTokenCheck ) {
-            throw new \Model\WrongCookieInfoException();
+            throw new \Model\WrongAuthCredentialsException();
         }
+
+        return $user;
     }
 
-    private function verifyExpireDate($user) : bool {
-        $this->userData = $this->authDAL->getAuthUser($user); 
+    private function verifyExpireDate(UserCredentials $credentials) : bool {
+        $userData = $this->authDAL->getAuthUser($credentials); 
         $currentDate = date("Y-m-d H:i:s", time());
-        $expireDate = $this->userData[self::$colExpireDate];
+        $expireDate = $userData[self::$colExpireDate];
         return $expireDate > $currentDate;
     }  
 
-    private function verifyTempPwd(User $user) : bool {
-        $this->userData = $this->authDAL->getAuthUser($user); 
-        return password_verify($user->getPassword(), $this->userData[self::$colTempPwd]);
+    private function verifyTempPwd(UserCredentials $credentials) : bool {
+        $userData = $this->authDAL->getAuthUser($credentials); 
+        return password_verify($credentials->getPassword(), $userData[self::$colTempPwd]);
     }
 
-    public function saveAuthCredentials($user) {
+    public function saveAuthCredentials(User $user) {
         $this->authDAL->saveAuthUser($user);
     }
 

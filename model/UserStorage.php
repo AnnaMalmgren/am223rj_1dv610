@@ -15,9 +15,15 @@ class UserStorage {
         $this->auth = new Authentication();
     }
 
-    public function loginUserByRequest(User $user) {
-        $this->auth->validateRequestCredentials($user);
-        $this->loggedInUser = $user; 
+    public function loginUserByRequest(UserCredentials $credentials) {
+        $userInfo = $this->auth->validateRequestCredentials($credentials);
+        $this->loggedInUser = new User($userInfo['username'], $userInfo['password']);
+    }
+
+    public function loginUserByCookies(UserCredentials $credentials) {
+        $userInfo = $this->auth->validateAuthCredentials($credentials);
+        $this->loggedInUser = new User($userInfo['authUsername'], $userInfo['passwordHash']);
+
     }
 
     public function setUserSession() {
@@ -34,12 +40,6 @@ class UserStorage {
         $this->loggedInUser->setTempPassword();
         $this->auth->saveAuthCredentials($this->loggedInUser);
     }
-
-    public function loginUserByCookies(User $user) {
-        $this->auth->validateAuthCredentials($user);
-        $this->loggedInUser = $user;
-    }
-
 
     public function getLoggedInUser() {
         return $this->loggedInUser;

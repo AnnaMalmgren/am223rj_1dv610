@@ -2,7 +2,7 @@
 namespace View;
 
 require_once(__DIR__ . '/../model/UserStorage.php');
-require_once(__DIR__ . '/../model/User.php');
+require_once(__DIR__ . '/../model/UserCredentials.php');
 
 class LoginView {
 	private static $login = 'LoginView::Login';
@@ -16,9 +16,11 @@ class LoginView {
 	private $message = "";
 	private $username = "";
 	private $userStorage;
+	private $cookieExpiresIn;
 
 	public function __construct() {
 		$this->userStorage = new \Model\UserStorage();
+		$this->cookieExpiresIn = time() + (7 * 24 * 60 * 60);
 	}
 
 	public function userWantsToAuthenticate() : bool {
@@ -45,10 +47,6 @@ class LoginView {
 		return trim($_POST[self::$password]);
 	}
 
-	public function isCredentialsSet() : bool {
-		return !empty($this->getRequestName()) && !empty($this->getRequestPwd());
-	}
-
 	public function setCredentialsMissingMsg() {
 		if (empty($this->getRequestName())) {
 			$this->message = 'Username is missing';
@@ -57,20 +55,40 @@ class LoginView {
 		}
 	}
 	
-	public function getUserCredentials() : \Model\User {
-		return new \Model\User($this->getRequestName(), $this->getRequestPwd());
+	public function getLoginCredentials() : \Model\UserCredentials {
+		return new \Model\UserCredentials($this->getRequestName(), $this->getRequestPwd());
 	}
 
-	public function getCookieCredentials() : \Model\User {
-		return new \Model\User($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
+	public function getCookieCredentials() : \Model\UserCredentials {
+		return new \Model\UserCredentials($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
 	}
 
-	public function setWrongNameOrPwd() {
+	public function getUserCredentials() : \Model\UserCredentials {
+		if ($this->userWantsToLogin()) {
+			return $this->getLoginCredentials();
+		} else if ($this->userWantsToAuthenticate()) {
+			return $this->getCookieCredentials();
+		}
+	}
+
+	public function setNoUsernamegMsg() {
+		$this->message = "Username is missing";
+	}
+
+	public function setNoPasswordMsg() {
+		$this->message = "Password is missing";
+	}
+
+	public function setWrongNameOrPwdMsg() {
 		$this->message = "Wrong name or password";
 	}
 
-	public function setWrongInfoInCookies() {
+	public function setWrongAuthCredentialsMsg() {
 		$this->message = "Wrong information in cookies";
+	}
+
+	public function setUserRegisteredMsg() {
+		$this->message = "Registered new user.";
 	}
 
 	public function setWelcomeMsg() {
@@ -113,9 +131,9 @@ class LoginView {
 		}
 	}
 
-	public function setCookies(\Model\User $user, $expiresIn) {
-		setcookie(self::$cookieName, $this->getRequestName(),  $expiresIn);
-		setcookie(self::$cookiePassword, $user->tempPassword,  $expiresIn);
+	public function setCookies(\Model\User $user) {
+		setcookie(self::$cookieName, $this->getRequestName(), $this->cookieExpiresIn);
+		setcookie(self::$cookiePassword, $user->tempPassword, $this->cookieExpiresIn);
 	}
 
 	public function removeCookies() {

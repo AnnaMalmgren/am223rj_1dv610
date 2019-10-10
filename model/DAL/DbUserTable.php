@@ -6,10 +6,10 @@ require_once('DBconn.php');
 
  class DbUserTable extends DBconn {
 
-    public function fetchUser(User $user) {
+    public function getUser(UserCredentials $credentials) {
         $sql = "SELECT * FROM users WHERE BINARY username=?";
         $types = "s";
-        $param = [$user->getUsername()];
+        $param = [$credentials->getUsername()];
         return $this->getFromDB($sql, $types, $param);
     }
 
@@ -20,7 +20,7 @@ require_once('DBconn.php');
         $this->saveToDB($sql, $types, $params);
     }
 
-    private function hashedPassword($user) {
+    private function hashedPassword(User $user) {
         return password_hash($user->getPassword(), PASSWORD_DEFAULT); 
     }
  }

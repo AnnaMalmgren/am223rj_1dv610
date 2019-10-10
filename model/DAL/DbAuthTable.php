@@ -7,14 +7,7 @@ require_once('DBconn.php');
  class DbAuthTable extends DBconn {
     private static $colPwd = 'passwordHash';
 
-    public function getAuthUser(User $user) {
-        $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
-        $types = "s";
-        $param = [$user->getUsername()];
-        return $this->getFromDB($sql, $types, $param);
-    }
-
-    public function saveAuthUser($user) {
+    public function saveAuthUser(User $user) {
   
         if ($this->getAuthUser($user)) {
             //if user already exist in DB update auth info for user.
@@ -27,15 +20,22 @@ require_once('DBconn.php');
         $this->saveToDB($sql, $types, $params);
     }
 
+    public function getAuthUser($user) {
+        $sql = "SELECT * FROM auth_users WHERE BINARY authUsername=?";
+        $types = "s";
+        $param = [$user->getUsername()];
+        return $this->getFromDB($sql, $types, $param);
+    }
 
-    private function updateAuthUser($user) {
+
+    private function updateAuthUser(User $user) {
         $sql = "UPDATE auth_users SET expireDate = ?, passwordHash = ? WHERE BINARY authUsername = ?";
         $types = "sss";
         $params = [$this->setExpireDate(), $this->hashPassword($user), $user->getUsername()];
         $this->updateDB($sql, $types, $params); 
     }
 
-    private function hashPassword($user) {
+    private function hashPassword(User $user) {
         $pwd = $user->getTempPassword();
         return password_hash($pwd, PASSWORD_DEFAULT);
     }
