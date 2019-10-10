@@ -41,8 +41,7 @@ class LoginController {
     private function doKeepMeLoggedIn() {
         if ($this->view->rememberMe()) {
             $this->userStorage->saveCredentials();
-            $this->view->setCookies($this->userStorage->getLoggedInUser());
-            $this->view->setRememberMeWelcomeMsg();
+            $this->view->setRememberMeUI($this->userStorage->getLoggedInUser());
         }
     }
 
@@ -56,23 +55,22 @@ class LoginController {
     }
 
     private function tryAuthAndLogin() {
-        if ($this->userWantsToLoginWithCookies()) {
+        if ($this->userWantsLoginByAuth()) {
             $authCredentials = $this->view->getUserCredentials();
-            $this->userStorage->loginUserByCookies($authCredentials);
+            $this->userStorage->loginUserByAuth($authCredentials);
             $this->view->setWelcomeBackMsg();
             $this->userStorage->setUserSession();
         }
     }
 
-    private function userWantsToLoginWithCookies() : bool  {
+    private function userWantsLoginByAuth() : bool  {
         return $this->view->userWantsToAuthenticate() && !$this->userStorage->isUserLoggedIn();
     }
 
     public function logoutUser() {
         if ($this->userWantsToLogout()) {
-            $this->view->removeCookies();
+            $this->view->setLogoutUI();
             $this->userStorage->endSession();
-            $this->view->setByeMessage();
         }
     }
 

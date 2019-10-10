@@ -17,12 +17,12 @@ class UserStorage {
 
     public function loginUserByRequest(UserCredentials $credentials) {
         $userInfo = $this->auth->validateRequestCredentials($credentials);
-        $this->loggedInUser = new User($userInfo['username'], $userInfo['password']);
+        $this->loggedInUser = $this->auth->getAuthenticatedUser();
     }
 
-    public function loginUserByCookies(UserCredentials $credentials) {
+    public function loginUserByAuth(UserCredentials $credentials) {
         $userInfo = $this->auth->validateAuthCredentials($credentials);
-        $this->loggedInUser = new User($userInfo['authUsername'], $userInfo['passwordHash']);
+        $this->loggedInUser = $this->auth->getAuthenticatedUser();
 
     }
 

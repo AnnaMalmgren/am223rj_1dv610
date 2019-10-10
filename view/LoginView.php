@@ -46,20 +46,12 @@ class LoginView {
 	public function getRequestPwd() : string {
 		return trim($_POST[self::$password]);
 	}
-
-	public function setCredentialsMissingMsg() {
-		if (empty($this->getRequestName())) {
-			$this->message = 'Username is missing';
-		} else if (empty($this->getRequestPwd())) {
-			$this->message = 'Password is missing';
-		}
-	}
 	
-	public function getLoginCredentials() : \Model\UserCredentials {
+	private function getLoginCredentials() : \Model\UserCredentials {
 		return new \Model\UserCredentials($this->getRequestName(), $this->getRequestPwd());
 	}
 
-	public function getCookieCredentials() : \Model\UserCredentials {
+	private function getCookieCredentials() : \Model\UserCredentials {
 		return new \Model\UserCredentials($_COOKIE[self::$cookieName], $_COOKIE[self::$cookiePassword]);
 	}
 
@@ -131,9 +123,19 @@ class LoginView {
 		}
 	}
 
-	public function setCookies(\Model\User $user) {
+    public function setRememberMeUI(\Model\User $user) {
+		$this->setCookies($user);
+		$this->setRememberMeWelcomeMsg();
+	}
+
+	private function setCookies(\Model\User $user) {
 		setcookie(self::$cookieName, $this->getRequestName(), $this->cookieExpiresIn);
-		setcookie(self::$cookiePassword, $user->tempPassword, $this->cookieExpiresIn);
+		setcookie(self::$cookiePassword, $user->getTempPassword(), $this->cookieExpiresIn);
+	}
+
+	public function setLogoutUI() {
+		$this->removeCookies();
+		$this->setByeMessage();
 	}
 
 	public function removeCookies() {

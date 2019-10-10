@@ -8,9 +8,12 @@ require_once('DAL/DbAuthTable.php');
 class Authentication {
     private $auhtDAL;
     private $userDAL;
+    private static $colUsername = 'username';
+    private static $colAuthUsername = 'authUsername';
     private static $colTempPwd= 'passwordHash';
-    private static $colPwd = 'password';
+    private static $colPassword = 'password';
     private static $colExpireDate = 'expireDate';
+    private $authenticatedUser;
 
 
     public function __construct() {
@@ -18,7 +21,7 @@ class Authentication {
         $this->userDAL = new \Model\DbUserTable();
     }
 
-    public function validateRequestCredentials(UserCredentials $credentials) : User {
+    public function validateRequestCredentials(UserCredentials $credentials) {
         $user = $this->userDAL->getUser($credentials);
         if (!$user) {
             throw new WrongCredentialsException();
@@ -28,15 +31,15 @@ class Authentication {
             throw new WrongCredentialsException();
         }
 
-        return $user;
+        $this->authenticatedUser = new User($user[self::$colUsername], $user[self::$colPassword]);
     }
 
     private function verifyPassword (UserCredentials $credentials) : bool {
         $userData = $this->userDAL->getUser($credentials);
-        return password_verify($credentials->getPassword(), $userData[self::$colPwd]);       
+        return password_verify($credentials->getPassword(), $userData[self::$colPassword]);       
     }
 
-    public function validateAuthCredentials(UserCredentials $credentials) : User{
+    public function validateAuthCredentials(UserCredentials $credentials) {
         $user = $this->authDAL->getAuthUser($credentials);
 
         $expireDateCheck = $this->verifyExpireDate($credentials);
@@ -46,7 +49,7 @@ class Authentication {
             throw new \Model\WrongAuthCredentialsException();
         }
 
-        return $user;
+        $this->authenticatedUser = new User($user[self::$colAuthUsername], $user[self::$colTempPwd]);
     }
 
     private function verifyExpireDate(UserCredentials $credentials) : bool {
@@ -59,6 +62,10 @@ class Authentication {
     private function verifyTempPwd(UserCredentials $credentials) : bool {
         $userData = $this->authDAL->getAuthUser($credentials); 
         return password_verify($credentials->getPassword(), $userData[self::$colTempPwd]);
+    }
+
+    public function getAuthenticatedUser() {
+        return $this->authenticatedUser;
     }
 
     public function saveAuthCredentials(User $user) {

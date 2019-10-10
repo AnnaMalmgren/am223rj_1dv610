@@ -8,7 +8,7 @@ require_once('DAL/DbUserTable.php');
 class User {
     private $username;
     private $password;
-    public $tempPassword;
+    private $tempPassword;
     private $minUsernameLength = 3;
     private $minPassswordLength = 6;
     private $bytesLength = 12;
