@@ -41,7 +41,6 @@ class Authentication {
 
     public function validateAuthCredentials(UserCredentials $credentials) {
         $user = $this->authDAL->getAuthUser($credentials);
-
         $expireDateCheck = $this->verifyExpireDate($credentials);
         $pwdTokenCheck = $this->verifyTempPwd($credentials);
 

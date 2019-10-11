@@ -31,17 +31,8 @@ class LoginController {
     private function tryLoginUser() {
         if ($this->view->userWantsToLogin()) {
             $userCredentials = $this->view->getUserCredentials();
-            $this->userStorage->loginUserByRequest($userCredentials);
-            $this->view->setWelcomeMsg();
-            $this->doKeepMeLoggedIn();
-            $this->userStorage->setUserSession();
-        }
-    }
-
-    private function doKeepMeLoggedIn() {
-        if ($this->view->rememberMe()) {
-            $this->userStorage->saveCredentials();
-            $this->view->setRememberMeUI($this->userStorage->getLoggedInUser());
+            $this->userStorage->loginUserByRequest($userCredentials, $this->view->rememberMe());
+            $this->view->setLoggedInView($this->userStorage->getLoggedInUser());
         }
     }
 
@@ -59,7 +50,6 @@ class LoginController {
             $authCredentials = $this->view->getUserCredentials();
             $this->userStorage->loginUserByAuth($authCredentials);
             $this->view->setWelcomeBackMsg();
-            $this->userStorage->setUserSession();
         }
     }
 

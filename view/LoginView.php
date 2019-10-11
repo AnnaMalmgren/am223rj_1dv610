@@ -83,22 +83,6 @@ class LoginView {
 		$this->message = "Registered new user.";
 	}
 
-	public function setWelcomeMsg() {
-		if ($this->hasBeenViewed()) {
-			$this->message = "Welcome";
-		}
-	}
-
-	private function hasBeenViewed() {
-		return !$this->isLoggedIn();
-	}
-
-	public function setRememberMeWelcomeMsg() {
-		if ($this->hasBeenViewed()) {
-			$this->message = "Welcome and you will be remembered";
-		}
-	}
-
 	public function setWelcomeBackMsg() {
 		$this->message = "Welcome back with cookie";
 	}
@@ -120,6 +104,15 @@ class LoginView {
 			return $this->getRequestName();
 		} else {
 			return $this->username;
+		}
+	}
+
+	public function setLoggedInView(\Model\User $user) {
+		if ($this->rememberMe()) {
+			$this->setCookies($user);
+			$this->message = "Welcome and you will be remembered";
+		} else {
+			$this->message = "Welcome";
 		}
 	}
 

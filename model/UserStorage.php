@@ -15,18 +15,24 @@ class UserStorage {
         $this->auth = new Authentication();
     }
 
-    public function loginUserByRequest(UserCredentials $credentials) {
+    public function loginUserByRequest(UserCredentials $credentials, bool $rememberMe) {
         $userInfo = $this->auth->validateRequestCredentials($credentials);
         $this->loggedInUser = $this->auth->getAuthenticatedUser();
+
+        if ($rememberMe) {
+            $this->saveCredentials();
+        }
+
+        $this->setUserSession();
     }
 
     public function loginUserByAuth(UserCredentials $credentials) {
         $userInfo = $this->auth->validateAuthCredentials($credentials);
         $this->loggedInUser = $this->auth->getAuthenticatedUser();
-
+        $this->setUserSession();
     }
 
-    public function setUserSession() {
+    private function setUserSession() {
         session_regenerate_id(); 
         $_SESSION[self::$sessionName] = $this->loggedInUser->getUsername();
         $_SESSION[self::$userAgent] =  $this->getClientsBrowserName();

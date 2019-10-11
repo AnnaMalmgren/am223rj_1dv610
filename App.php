@@ -31,10 +31,13 @@ class App {
     }
 
     private function changeState() {
-        $this->loginController->loginUserByRequest();
-        $this->loginController->loginUserByAuth();
-        $this->regController->registerUser();
-        $this->loginController->logoutUser();
+        if (!$this->loginView->isLoggedIn()) {
+            $this->loginController->loginUserByRequest();
+            $this->loginController->loginUserByAuth();
+            $this->regController->registerUser();
+        } else {
+            $this->loginController->logoutUser();
+        }
     }
 
     private function renderViews() {   
@@ -58,7 +61,7 @@ class App {
         if(!$this->loginView->isLoggedIn()) {
             $this->view->setLink($regLink);
         }
-       
+ 
         $this->view->render($this->loginView->isLoggedIn(), $this->loginView, $this->timeView);
     }
 }
